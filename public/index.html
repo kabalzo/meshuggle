@@ -41,72 +41,100 @@
 
     #app { width: 100%; max-width: 540px; }
 
-    /* ── Header ── */
-    header { text-align: center; margin-bottom: 2rem; }
+    header { text-align: center; margin-bottom: 1.75rem; }
     header h1 { font-size: 2.2rem; font-weight: 600; letter-spacing: -1.5px; }
     header h1 em { font-style: normal; color: var(--accent); }
     header p { font-size: 0.82rem; color: var(--text2); margin-top: 0.35rem; }
 
     /* ── Tabs ── */
     .tabs {
-      display: flex; gap: 0;
-      border: 1px solid var(--border);
-      border-radius: 12px; overflow: hidden;
-      margin-bottom: 1.5rem;
+      display: flex; border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem;
     }
     .tab {
-      flex: 1; padding: 0.6rem;
-      background: transparent; border: none;
+      flex: 1; padding: 0.6rem; background: transparent; border: none;
       color: var(--text2); font-size: 0.82rem; font-weight: 500;
-      font-family: inherit; cursor: pointer;
-      transition: all 0.15s;
+      font-family: inherit; cursor: pointer; transition: all 0.15s;
       border-right: 1px solid var(--border);
     }
     .tab:last-child { border-right: none; }
     .tab.active { background: var(--bg3); color: var(--text); }
     .tab:hover:not(.active) { background: var(--bg2); }
 
-    /* ── Views ── */
     .view { display: none; }
     .view.active { display: block; }
 
-    /* ── Progress dots ── */
-    .dots { display: flex; justify-content: center; gap: 9px; margin-bottom: 1.75rem; }
-    .dot {
-      width: 13px; height: 13px; border-radius: 50%;
-      border: 1.5px solid var(--border2); background: transparent;
-      transition: all 0.25s;
+    /* ── Scoreboard strip ── */
+    #scoreboard {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 0.9rem 1.25rem;
+      margin-bottom: 1rem;
     }
-    .dot.active  { border-color: var(--accent); background: var(--accent-dim); }
-    .dot.correct { background: var(--green); border-color: var(--green); }
-    .dot.wrong   { background: var(--red);   border-color: var(--red); }
-    .dot.skipped { background: var(--bg3);   border-color: var(--border2); }
+    .sb-cell { text-align: center; }
+    .sb-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.3rem; }
+    .sb-val { font-size: 1.3rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+    .sb-val.green { color: var(--green); }
+    .sb-val.red   { color: var(--red); }
+    .sb-val.yellow { color: var(--yellow); }
+    .sb-divider { width: 1px; background: var(--border); align-self: stretch; }
+
+    /* ── Outs & skips indicators ── */
+    .indicators {
+      display: flex; justify-content: space-between;
+      margin-bottom: 1rem; gap: 8px;
+    }
+    .ind-box {
+      flex: 1; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.7rem 1rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+    }
+    .ind-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); }
+    .ind-icons { display: flex; gap: 5px; }
+    .ind-icon { font-size: 1rem; transition: all 0.2s; }
+    .ind-icon.used { filter: grayscale(1); opacity: 0.2; }
+
+    /* ── Strike pips for current song ── */
+    .strike-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-bottom: 0;
+    }
+    .strike-pip {
+      width: 9px; height: 9px; border-radius: 50%;
+      border: 1.5px solid var(--border2); background: transparent; transition: all 0.2s;
+    }
+    .strike-pip.hit { background: var(--red); border-color: var(--red); }
 
     /* ── Player card ── */
     #player-card {
       background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 18px; padding: 1.75rem 1.5rem;
+      border-radius: 18px; padding: 1.5rem;
       margin-bottom: 1rem;
-      display: flex; flex-direction: column; align-items: center; gap: 1.1rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.9rem;
     }
 
-    #round-label {
+    #song-counter {
       font-size: 0.72rem; text-transform: uppercase;
       letter-spacing: 0.1em; color: var(--text3);
     }
 
-    #play-btn {
-      display: flex; align-items: center; gap: 10px;
-      padding: 0.8rem 2.2rem; border-radius: 999px;
+    .clip-btns { display: flex; gap: 8px; width: 100%; justify-content: center; }
+
+    .clip-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0.75rem 1.5rem; border-radius: 999px;
       border: 1px solid var(--border2); background: var(--bg3);
-      color: var(--text); font-size: 1rem; font-weight: 500;
+      color: var(--text); font-size: 0.92rem; font-weight: 500;
       font-family: inherit; cursor: pointer;
       transition: background 0.15s, border-color 0.15s, transform 0.08s;
-      min-width: 160px; justify-content: center;
+      justify-content: center;
     }
-    #play-btn:hover:not(:disabled) { background: #252525; border-color: var(--accent); }
-    #play-btn:active:not(:disabled) { transform: scale(0.96); }
-    #play-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .clip-btn:hover:not(:disabled) { background: #252525; border-color: var(--accent); }
+    .clip-btn:active:not(:disabled) { transform: scale(0.96); }
+    .clip-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .clip-btn.alt { border-color: var(--border); font-size: 0.82rem; padding: 0.65rem 1.1rem; }
+    .clip-btn.alt.unlocked { border-color: var(--yellow); color: var(--yellow); }
+    .clip-btn.alt.unlocked:hover:not(:disabled) { background: #1a1500; border-color: var(--yellow); }
 
     #prog-wrap {
       width: 100%; height: 3px;
@@ -120,11 +148,6 @@
 
     #hint { font-size: 0.8rem; color: var(--accent); min-height: 1.1em; text-align: center; }
 
-    /* ── Strike hearts ── */
-    .strikes { display: flex; gap: 6px; align-items: center; }
-    .strike-heart { font-size: 1.1rem; transition: all 0.2s; }
-    .strike-heart.lost { filter: grayscale(1); opacity: 0.25; }
-
     /* ── Search ── */
     #search-wrap { position: relative; margin-bottom: 0.6rem; }
     #search-input {
@@ -136,7 +159,7 @@
     }
     #search-input:focus { border-color: var(--accent); }
     #search-input::placeholder { color: var(--text3); }
-    #search-input:disabled { opacity: 0.4; cursor: not-allowed; }
+    #search-input:disabled { opacity: 0.35; cursor: not-allowed; }
 
     #suggestions {
       display: none; position: absolute;
@@ -156,7 +179,7 @@
     .sug-meta  { font-size: 0.72rem; color: var(--text2); text-align: right; line-height: 1.4; }
 
     /* ── Actions ── */
-    #action-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+    #action-row { display: flex; gap: 8px; margin-bottom: 1.25rem; }
     #submit-btn, #skip-btn {
       flex: 1; padding: 0.72rem 1rem;
       border-radius: 11px; font-size: 0.88rem; font-weight: 500;
@@ -170,30 +193,38 @@
     #skip-btn:hover:not(:disabled) { background: var(--bg3); color: var(--text); }
     #skip-btn:disabled { opacity: 0.25; cursor: not-allowed; }
 
-    /* ── History ── */
-    #history { margin-top: 0.25rem; }
-    .hist-label {
+    /* ── Feed ── */
+    #feed { margin-top: 0.25rem; }
+    .feed-label {
       font-size: 0.68rem; text-transform: uppercase;
       letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.5rem;
     }
-    .hist-item {
+    .feed-item {
       display: flex; justify-content: space-between; align-items: center;
       padding: 0.65rem 1rem; border-radius: 10px;
       border: 1px solid var(--border); margin-bottom: 5px; font-size: 0.85rem;
     }
-    .hist-item.correct { border-color: var(--green-b); background: var(--green-bg); }
-    .hist-item.wrong   { border-color: var(--red-b);   background: var(--red-bg); }
-    .hist-item.skipped { background: var(--bg2); color: var(--text2); }
-    .hist-title { font-weight: 500; }
-    .hist-sub   { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
-    .hist-item.correct .hist-sub { color: var(--green); opacity: 0.65; }
-    .hist-item.wrong   .hist-sub { color: var(--red);   opacity: 0.65; }
-    .hist-icon { font-size: 0.95rem; flex-shrink: 0; margin-left: 10px; }
+    .feed-item.correct { border-color: var(--green-b); background: var(--green-bg); }
+    .feed-item.wrong   { border-color: var(--red-b);   background: var(--red-bg); }
+    .feed-item.skipped { background: var(--bg2); color: var(--text2); }
+    .feed-title { font-weight: 500; }
+    .feed-sub   { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+    .feed-item.correct .feed-sub { color: var(--green); opacity: 0.7; }
+    .feed-item.wrong   .feed-sub { color: var(--red);   opacity: 0.7; }
+    .feed-icon { font-size: 0.95rem; flex-shrink: 0; margin-left: 10px; }
 
-    /* ── Results / name entry ── */
+    /* ── Out banner ── */
+    .out-banner {
+      text-align: center; padding: 0.6rem 1rem;
+      background: var(--red-bg); border: 1px solid var(--red-b);
+      border-radius: 10px; margin-bottom: 5px;
+      font-size: 0.82rem; color: var(--red); font-weight: 500;
+    }
+
+    /* ── Results ── */
     #results { display: none; }
     .results-inner { text-align: center; padding: 1.5rem 0.5rem 0; }
-    .results-inner h2 { font-size: 1.55rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .results-inner h2 { font-size: 1.6rem; font-weight: 600; margin-bottom: 0.3rem; }
     .results-inner .score-sub { font-size: 0.85rem; color: var(--text2); margin-bottom: 1.5rem; }
 
     #share-box {
@@ -206,7 +237,6 @@
     #share-box:hover { border-color: var(--accent); }
     #copy-tip { font-size: 0.72rem; color: var(--text3); margin-bottom: 1.5rem; }
 
-    /* Name entry */
     .name-entry {
       background: var(--bg2); border: 1px solid var(--border);
       border-radius: 14px; padding: 1.25rem; margin-bottom: 1rem; text-align: left;
@@ -251,21 +281,24 @@
     }
     #again-btn:hover { background: var(--bg3); border-color: var(--accent); }
 
+    .submitted-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.8rem; color: var(--green);
+      background: var(--green-bg); border: 1px solid var(--green-b);
+      border-radius: 8px; padding: 0.4rem 0.8rem; margin-top: 0.5rem;
+    }
+
     /* ── Leaderboard ── */
     #leaderboard-view { padding: 0.25rem 0; }
-    .lb-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 1rem;
-    }
+    .lb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
     .lb-title { font-size: 1rem; font-weight: 500; }
     .lb-refresh {
       font-size: 0.75rem; color: var(--text2); cursor: pointer;
-      background: none; border: none; font-family: inherit;
-      padding: 0.3rem 0.6rem; border-radius: 6px;
-      border: 1px solid var(--border); transition: all 0.15s;
+      background: none; border: 1px solid var(--border);
+      border-radius: 6px; padding: 0.3rem 0.6rem; font-family: inherit;
+      transition: all 0.15s;
     }
     .lb-refresh:hover { background: var(--bg3); color: var(--text); }
-
     .lb-table { width: 100%; border-collapse: collapse; }
     .lb-table th {
       font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em;
@@ -273,29 +306,18 @@
       border-bottom: 1px solid var(--border);
     }
     .lb-table th:last-child { text-align: right; }
-    .lb-table td {
-      padding: 0.6rem 0.75rem; font-size: 0.85rem;
-      border-bottom: 1px solid var(--border);
-    }
+    .lb-table td { padding: 0.6rem 0.75rem; font-size: 0.85rem; border-bottom: 1px solid var(--border); }
     .lb-table td:last-child { text-align: right; }
     .lb-table tr:last-child td { border-bottom: none; }
     .lb-table tr:hover td { background: var(--bg2); }
-
     .lb-rank { color: var(--text3); font-size: 0.78rem; width: 30px; }
     .lb-name { font-weight: 500; }
     .lb-score { font-family: 'JetBrains Mono', monospace; }
     .lb-date  { color: var(--text3); font-size: 0.75rem; }
-
-    .lb-medal-1 { color: #fbbf24; }
-    .lb-medal-2 { color: #d1d5db; }
-    .lb-medal-3 { color: #cd7c3f; }
-
-    .lb-score-5 { color: var(--green); }
-    .lb-score-4 { color: #86efac; }
-    .lb-score-3 { color: var(--yellow); }
+    .lb-score-hi  { color: var(--green); }
+    .lb-score-mid { color: var(--yellow); }
     .lb-score-low { color: var(--text2); }
-
-    .lb-empty { text-align: center; padding: 2rem; color: var(--text3); font-size: 0.85rem; }
+    .lb-empty   { text-align: center; padding: 2rem; color: var(--text3); font-size: 0.85rem; }
     .lb-loading { text-align: center; padding: 1.5rem; color: var(--text3); font-size: 0.85rem; }
 
     /* ── Spinner ── */
@@ -306,21 +328,13 @@
       vertical-align: middle; margin-right: 6px;
     }
     @keyframes rot { to { transform: rotate(360deg); } }
-
-    /* ── Submitted badge ── */
-    .submitted-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 0.8rem; color: var(--green);
-      background: var(--green-bg); border: 1px solid var(--green-b);
-      border-radius: 8px; padding: 0.4rem 0.8rem; margin-top: 0.5rem;
-    }
   </style>
 </head>
 <body>
 <div id="app">
   <header>
     <h1>Mesh<em>uggle</em> 🎸</h1>
-    <p>2-second clip · 3 strikes per round · guess the Meshuggah song</p>
+    <p>3-second clip · 3 strikes = out · 3 outs = game over · 3 skips per game</p>
   </header>
 
   <div class="tabs">
@@ -330,18 +344,69 @@
 
   <!-- ── GAME VIEW ── -->
   <div id="game-view" class="view active">
-    <div class="dots" id="dots"></div>
 
+    <!-- Scoreboard -->
+    <div id="scoreboard">
+      <div class="sb-cell">
+        <div class="sb-label">Score</div>
+        <div class="sb-val green" id="sb-score">0</div>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-cell">
+        <div class="sb-label">Outs</div>
+        <div class="sb-val red" id="sb-outs">0 / 3</div>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-cell">
+        <div class="sb-label">Skips left</div>
+        <div class="sb-val yellow" id="sb-skips">3</div>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-cell">
+        <div class="sb-label">Song #</div>
+        <div class="sb-val" id="sb-song">1</div>
+      </div>
+    </div>
+
+    <!-- Outs & strikes indicators -->
+    <div class="indicators">
+      <div class="ind-box">
+        <div class="ind-label">Outs</div>
+        <div class="ind-icons">
+          <span class="ind-icon" id="out0">⚾</span>
+          <span class="ind-icon" id="out1">⚾</span>
+          <span class="ind-icon" id="out2">⚾</span>
+        </div>
+      </div>
+      <div class="ind-box">
+        <div class="ind-label">Strikes this song</div>
+        <div class="ind-icons strike-row">
+          <div class="strike-pip" id="sp0"></div>
+          <div class="strike-pip" id="sp1"></div>
+          <div class="strike-pip" id="sp2"></div>
+        </div>
+      </div>
+      <div class="ind-box">
+        <div class="ind-label">Skips</div>
+        <div class="ind-icons">
+          <span class="ind-icon" id="sk0">⏭️</span>
+          <span class="ind-icon" id="sk1">⏭️</span>
+          <span class="ind-icon" id="sk2">⏭️</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Player card -->
     <div id="player-card">
-      <div id="round-label">Round <span id="round-num">1</span> of 5</div>
-      <button id="play-btn">▶&nbsp; Play clip</button>
+      <div id="song-counter">Song #<span id="song-num">1</span></div>
+
+      <div class="clip-btns">
+        <button class="clip-btn" id="play-btn">▶&nbsp; Play clip</button>
+        <button class="clip-btn alt" id="alt-btn" disabled title="Unlocks after 2 strikes">🔒 Alt clip</button>
+      </div>
+
       <div id="prog-wrap"><div id="prog-fill"></div></div>
       <div id="hint"></div>
-      <div class="strikes" id="strikes">
-        <span class="strike-heart" id="h0">❤️</span>
-        <span class="strike-heart" id="h1">❤️</span>
-        <span class="strike-heart" id="h2">❤️</span>
-      </div>
     </div>
 
     <div id="search-wrap">
@@ -351,12 +416,12 @@
 
     <div id="action-row">
       <button id="submit-btn" disabled>Submit guess</button>
-      <button id="skip-btn">Skip →</button>
+      <button id="skip-btn">Skip ⏭</button>
     </div>
 
-    <div id="history"></div>
+    <div id="feed"></div>
 
-    <!-- Results panel -->
+    <!-- Results -->
     <div id="results">
       <div class="results-inner">
         <h2 id="result-title"></h2>
@@ -364,7 +429,6 @@
         <div id="share-box"></div>
         <p id="copy-tip">click to copy</p>
 
-        <!-- Name entry for leaderboard -->
         <div class="name-entry" id="name-entry">
           <label>Add your score to the leaderboard</label>
           <div class="name-row">
@@ -399,9 +463,6 @@
 <audio id="audio" preload="none"></audio>
 
 <script>
-// ─────────────────────────────────────────────
-//  Song list
-// ─────────────────────────────────────────────
 const ALL_SONGS = [
   // Contradictions Collapse (1991)
   {t:"Paralyzing Ignorance",         a:"Contradictions Collapse", y:1991},
@@ -515,39 +576,45 @@ const ALL_SONGS = [
   {t:"Past Tense",                    a:"Immutable",               y:2022},
 ];
 
-// ─────────────────────────────────────────────
-//  Constants & state
-// ─────────────────────────────────────────────
-const TOTAL   = 5;
-const MAX_STR = 3; // strikes per round
-const CLIP_MS = 2000;
+// ── Constants ─────────────────────────────────
+const CLIP_MS     = 3000;
+const MAX_STRIKES = 3; // strikes per song before out
+const MAX_OUTS    = 3; // outs before game over
+const MAX_SKIPS   = 3; // skips per game
+const ALT_UNLOCK  = 2; // strikes needed to unlock alt clip
 
-let rounds = [], round = 0, strikes = 0;
-let chosen = null, history = [];
-let previewCache = {};
+// ── State ─────────────────────────────────────
+let deck = [];          // shuffled song pool, refill when empty
+let used = new Set();   // titles played this game
+let song = null;        // current song object
+let songNum  = 0;       // total songs attempted
+let score    = 0;       // correct answers
+let outs     = 0;       // outs accumulated
+let skipsLeft = MAX_SKIPS;
+let strikes  = 0;       // strikes on current song
+let feed     = [];      // game history entries
+let previewCache = {};  // title -> url | null
+let altUrl   = null;    // alternate clip url (different start)
 let progTimer = null;
-let canPlay = true;
+let canPlay  = true;
 let scoreSubmitted = false;
 
-// ─────────────────────────────────────────────
-//  DOM
-// ─────────────────────────────────────────────
+// ── DOM ───────────────────────────────────────
 const audio     = document.getElementById('audio');
 const playBtn   = document.getElementById('play-btn');
+const altBtn    = document.getElementById('alt-btn');
 const progFill  = document.getElementById('prog-fill');
 const hintEl    = document.getElementById('hint');
 const searchEl  = document.getElementById('search-input');
 const sugBox    = document.getElementById('suggestions');
 const submitBtn = document.getElementById('submit-btn');
 const skipBtn   = document.getElementById('skip-btn');
-const historyEl = document.getElementById('history');
+const feedEl    = document.getElementById('feed');
 const resultsEl = document.getElementById('results');
 
 audio.volume = 0.6;
 
-// ─────────────────────────────────────────────
-//  Tab switching
-// ─────────────────────────────────────────────
+// ── Tab switching ─────────────────────────────
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach((t, i) => {
     t.classList.toggle('active', (i === 0) === (tab === 'game'));
@@ -557,19 +624,41 @@ function switchTab(tab) {
   if (tab === 'leaderboard') loadLeaderboard();
 }
 
-// ─────────────────────────────────────────────
-//  iTunes preview fetch
-// ─────────────────────────────────────────────
-async function fetchPreview(song) {
-  const key = song.t;
+// ── Deck management ───────────────────────────
+function refillDeck() {
+  // Shuffle all songs not yet used this game; if all used, reset used set
+  let pool = ALL_SONGS.filter(s => !used.has(s.t));
+  if (pool.length < 5) { used.clear(); pool = [...ALL_SONGS]; }
+  deck = shuffle(pool);
+}
+
+function nextSong() {
+  if (deck.length === 0) refillDeck();
+  song = deck.pop();
+  used.add(song.t);
+  altUrl = null;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── iTunes fetch ──────────────────────────────
+async function fetchPreview(s) {
+  const key = s.t;
   if (key in previewCache) return previewCache[key];
   previewCache[key] = null;
   try {
-    const q = encodeURIComponent(`meshuggah ${song.t}`);
+    const q = encodeURIComponent(`meshuggah ${s.t}`);
     const res = await fetch(`https://itunes.apple.com/search?term=${q}&entity=song&media=music&limit=8`);
     const data = await res.json();
     const items = data.results || [];
-    const tl = song.t.toLowerCase();
+    const tl = s.t.toLowerCase();
     const match = items.find(i => i.trackName?.toLowerCase() === tl && i.previewUrl)
                 || items.find(i => i.trackName?.toLowerCase().includes(tl) && i.previewUrl)
                 || items.find(i => i.previewUrl);
@@ -581,105 +670,126 @@ async function fetchPreview(song) {
   }
 }
 
-function prefetchNext() {
-  if (round + 1 < TOTAL) fetchPreview(rounds[round + 1]);
+function prefetchUpcoming() {
+  // Prefetch top 2 upcoming songs in deck
+  deck.slice(-2).forEach(s => fetchPreview(s));
 }
 
-// ─────────────────────────────────────────────
-//  Shuffle
-// ─────────────────────────────────────────────
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-// ─────────────────────────────────────────────
-//  Init / setup
-// ─────────────────────────────────────────────
+// ── Init ──────────────────────────────────────
 function init() {
-  rounds = shuffle(ALL_SONGS).slice(0, TOTAL);
-  round = 0; strikes = 0; history = []; previewCache = {};
-  scoreSubmitted = false;
+  deck = []; used = new Set();
+  score = 0; outs = 0; skipsLeft = MAX_SKIPS; songNum = 0; feed = [];
+  previewCache = {}; scoreSubmitted = false;
   resultsEl.style.display = 'none';
   document.getElementById('player-card').style.display = '';
   document.getElementById('search-wrap').style.display = '';
   document.getElementById('action-row').style.display = '';
-  historyEl.innerHTML = '';
-  renderDots();
-  setupRound();
+  feedEl.innerHTML = '';
+  refillDeck();
+  nextSong();
+  setupSong();
+  updateScoreboard();
+  updateOuts();
+  updateSkips();
 }
 
-function setupRound() {
-  chosen = null; canPlay = true; strikes = 0;
+function setupSong() {
+  songNum++;
+  strikes = 0; canPlay = true; altUrl = null;
   submitBtn.disabled = true;
-  skipBtn.disabled = false;
+  skipBtn.disabled = skipsLeft <= 0;
   searchEl.disabled = false;
   searchEl.value = '';
   sugBox.style.display = 'none';
-  document.getElementById('round-num').textContent = round + 1;
+  document.getElementById('song-num').textContent = songNum;
+  document.getElementById('sb-song').textContent = songNum;
   progFill.style.width = '0%';
   hintEl.textContent = '';
   playBtn.disabled = false;
   playBtn.innerHTML = '▶&nbsp; Play clip';
+  altBtn.disabled = true;
+  altBtn.className = 'clip-btn alt';
+  altBtn.title = 'Unlocks after 2 strikes';
+  altBtn.innerHTML = '🔒 Alt clip';
   document.getElementById('search-wrap').style.display = '';
   document.getElementById('action-row').style.display = '';
   updateStrikes();
-  fetchPreview(rounds[round]).then(prefetchNext);
+  fetchPreview(song).then(prefetchUpcoming);
+}
+
+function updateScoreboard() {
+  document.getElementById('sb-score').textContent = score;
+  document.getElementById('sb-outs').textContent = `${outs} / ${MAX_OUTS}`;
+  document.getElementById('sb-skips').textContent = skipsLeft;
+}
+
+function updateOuts() {
+  for (let i = 0; i < 3; i++) {
+    document.getElementById(`out${i}`).className = 'ind-icon' + (i < outs ? ' used' : '');
+  }
+}
+
+function updateSkips() {
+  for (let i = 0; i < 3; i++) {
+    document.getElementById(`sk${i}`).className = 'ind-icon' + (i >= skipsLeft ? ' used' : '');
+  }
+  skipBtn.disabled = skipsLeft <= 0;
+  updateScoreboard();
 }
 
 function updateStrikes() {
   for (let i = 0; i < 3; i++) {
-    document.getElementById(`h${i}`).classList.toggle('lost', i < strikes);
+    document.getElementById(`sp${i}`).className = 'strike-pip' + (i < strikes ? ' hit' : '');
+  }
+  // Unlock alt clip after 2 strikes
+  if (strikes >= ALT_UNLOCK) {
+    altBtn.disabled = false;
+    altBtn.className = 'clip-btn alt unlocked';
+    altBtn.title = 'Play a different part of the clip';
+    altBtn.innerHTML = '🎵 Alt clip';
   }
 }
 
-function renderDots() {
-  const el = document.getElementById('dots');
-  el.innerHTML = '';
-  for (let i = 0; i < TOTAL; i++) {
-    const d = document.createElement('div');
-    const h = history[i];
-    d.className = 'dot' + (h ? ` ${h.result}` : i === round ? ' active' : '');
-    el.appendChild(d);
-  }
-}
-
-// ─────────────────────────────────────────────
-//  Playback
-// ─────────────────────────────────────────────
-async function playClip() {
+// ── Playback ──────────────────────────────────
+async function playClip(useAlt = false) {
   if (!canPlay) return;
   canPlay = false;
-  playBtn.disabled = true;
-  playBtn.innerHTML = '<span class="spin"></span>Loading…';
 
-  const url = await fetchPreview(rounds[round]);
+  const btn = useAlt ? altBtn : playBtn;
+  btn.disabled = true;
+  btn.innerHTML = useAlt ? '<span class="spin"></span>Loading…' : '<span class="spin"></span>Loading…';
+
+  const url = await fetchPreview(song);
 
   if (!url) {
     hintEl.innerHTML = '<span style="color:var(--red)">No preview available — skip to continue</span>';
-    playBtn.innerHTML = '▶&nbsp; Play clip';
-    playBtn.disabled = false;
+    btn.innerHTML = useAlt ? '🎵 Alt clip' : '▶&nbsp; Play clip';
+    btn.disabled = useAlt ? strikes < ALT_UNLOCK : false;
     canPlay = true;
     return;
   }
 
-  const start = Math.floor(Math.random() * 22);
+  // Main clip: random start in first 15s of preview
+  // Alt clip: random start in latter half (15-27s) of preview
+  const start = useAlt
+    ? 15 + Math.floor(Math.random() * 12)
+    : Math.floor(Math.random() * 15);
+
   audio.src = url;
   audio.currentTime = start;
   audio.volume = 0.6;
 
-  playBtn.innerHTML = '■&nbsp; Playing…';
+  playBtn.innerHTML = useAlt ? '▶&nbsp; Play clip' : '■&nbsp; Playing…';
+  if (useAlt) altBtn.innerHTML = '■&nbsp; Playing…';
   progFill.style.width = '0%';
 
   try { await audio.play(); }
   catch {
     hintEl.textContent = 'Tap Play to start audio';
     playBtn.innerHTML = '▶&nbsp; Play clip';
+    altBtn.innerHTML = strikes >= ALT_UNLOCK ? '🎵 Alt clip' : '🔒 Alt clip';
     playBtn.disabled = false;
+    altBtn.disabled = strikes < ALT_UNLOCK;
     canPlay = true;
     return;
   }
@@ -696,13 +806,15 @@ async function playClip() {
     progFill.style.width = '100%';
     playBtn.innerHTML = '▶&nbsp; Replay';
     playBtn.disabled = false;
+    if (strikes >= ALT_UNLOCK) {
+      altBtn.innerHTML = '🎵 Alt clip';
+      altBtn.disabled = false;
+    }
     canPlay = true;
   }, CLIP_MS);
 }
 
-// ─────────────────────────────────────────────
-//  Search
-// ─────────────────────────────────────────────
+// ── Search ────────────────────────────────────
 function renderSuggestions(q) {
   if (!q.trim()) { sugBox.style.display = 'none'; return; }
   const low = q.toLowerCase();
@@ -720,120 +832,151 @@ function renderSuggestions(q) {
 }
 
 function pick(s) {
-  chosen = s;
+  searchEl._chosen = s;
   searchEl.value = s.t;
   sugBox.style.display = 'none';
   submitBtn.disabled = false;
 }
 
-// ─────────────────────────────────────────────
-//  Guess logic
-// ─────────────────────────────────────────────
+// ── Guess logic ───────────────────────────────
 function submitGuess() {
+  const chosen = searchEl._chosen;
   if (!chosen) return;
-  const correct = chosen.t.toLowerCase() === rounds[round].t.toLowerCase();
+  const correct = chosen.t.toLowerCase() === song.t.toLowerCase();
   resolve(correct ? 'correct' : 'wrong');
+}
+
+function doSkip() {
+  if (skipsLeft <= 0) return;
+  skipsLeft--;
+  updateSkips();
+  resolve('skipped');
 }
 
 function resolve(result) {
   audio.pause(); clearInterval(progTimer);
-  const song = rounds[round];
 
   if (result === 'correct') {
-    history.push({ result: 'correct', song, strikes });
-    renderDots(); renderHistory();
-    advance();
+    score++;
+    updateScoreboard();
+    addFeedItem('correct', song, strikes);
+    advanceSong();
     return;
   }
 
   if (result === 'skipped') {
-    history.push({ result: 'skipped', song });
-    renderDots(); renderHistory();
-    revealAnswer(song);
-    setTimeout(advance, 2400);
+    addFeedItem('skipped', song);
+    revealAndAdvance(false); // skip doesn't count as out
     return;
   }
 
-  // Wrong guess
+  // Wrong
   strikes++;
   updateStrikes();
 
-  if (strikes >= MAX_STR) {
-    history.push({ result: 'wrong', song });
-    renderDots(); renderHistory();
-    revealAnswer(song);
-    setTimeout(advance, 2400);
+  if (strikes >= MAX_STRIKES) {
+    // Out!
+    outs++;
+    updateOuts();
+    updateScoreboard();
+    addFeedItem('wrong', song);
+    addOutBanner();
+    if (outs >= MAX_OUTS) {
+      setTimeout(showResults, 1800);
+    } else {
+      revealAndAdvance(true);
+    }
     return;
   }
 
-  // Still have strikes — give hint
-  chosen = null; searchEl.value = ''; submitBtn.disabled = true;
+  // Still has strikes remaining — give hint after 1st strike
+  searchEl._chosen = null;
+  searchEl.value = '';
+  submitBtn.disabled = true;
   sugBox.style.display = 'none';
-  const hints = ['', `Hint: album — "${song.a}"`, `Hint: released ${song.y}`];
-  hintEl.textContent = hints[strikes] || '';
+  if (strikes === 1) hintEl.textContent = `Hint: album — "${song.a}"`;
 }
 
-function revealAnswer(song) {
-  hintEl.textContent = `✗  ${song.t} — ${song.a} (${song.y})`;
+function revealAndAdvance(wasOut) {
+  hintEl.textContent = `${wasOut ? '⚾ Out! ' : '⏭ Skipped — '}${song.t} — ${song.a} (${song.y})`;
   document.getElementById('search-wrap').style.display = 'none';
   document.getElementById('action-row').style.display = 'none';
   searchEl.disabled = true;
   submitBtn.disabled = true;
   skipBtn.disabled = true;
+  setTimeout(advanceSong, wasOut ? 2000 : 1600);
 }
 
-function advance() {
-  round++;
-  strikes = 0;
-  if (round >= TOTAL) { setTimeout(showResults, 700); return; }
-  setTimeout(() => { renderDots(); setupRound(); }, 350);
+function advanceSong() {
+  if (outs >= MAX_OUTS) { showResults(); return; }
+  nextSong();
+  setupSong();
 }
 
-// ─────────────────────────────────────────────
-//  History
-// ─────────────────────────────────────────────
-function renderHistory() {
-  if (!history.length) { historyEl.innerHTML = ''; return; }
-  historyEl.innerHTML = '<p class="hist-label">This game</p>';
-  history.slice().reverse().forEach(h => {
-    const icon = h.result === 'correct' ? '✓' : h.result === 'skipped' ? '—' : '✗';
-    const sub  = h.result === 'correct'
-      ? `${h.song.a} · ${h.song.y} · ${h.strikes === 0 ? 'first try!' : `${h.strikes} strike${h.strikes > 1 ? 's' : ''}`}`
-      : `${h.song.a} · ${h.song.y}`;
+// ── Feed ──────────────────────────────────────
+function addFeedItem(result, s, strikesUsed) {
+  feed.unshift({ result, song: s, strikesUsed });
+  renderFeed();
+}
+
+function addOutBanner() {
+  const div = document.createElement('div');
+  div.className = 'out-banner';
+  div.textContent = `⚾ Out ${outs} of ${MAX_OUTS}`;
+  feedEl.insertBefore(div, feedEl.firstChild);
+}
+
+function renderFeed() {
+  // Rebuild from feed array (banners are inserted separately)
+  const banners = Array.from(feedEl.querySelectorAll('.out-banner'));
+  feedEl.innerHTML = '';
+  if (feed.length) {
+    const lbl = document.createElement('p');
+    lbl.className = 'feed-label';
+    lbl.textContent = 'This game';
+    feedEl.appendChild(lbl);
+  }
+  // Re-insert banners at top
+  banners.forEach(b => feedEl.appendChild(b));
+  feed.forEach(h => {
+    const icon = h.result === 'correct' ? '✓' : h.result === 'skipped' ? '⏭' : '✗';
+    const sub = h.result === 'correct'
+      ? `${h.song.a} · ${h.strikesUsed === 0 ? 'first try!' : `${h.strikesUsed} strike${h.strikesUsed > 1 ? 's' : ''}`}`
+      : `${h.song.a}`;
     const div = document.createElement('div');
-    div.className = `hist-item ${h.result}`;
+    div.className = `feed-item ${h.result}`;
     div.innerHTML = `
       <div>
-        <div class="hist-title">${h.song.t}</div>
-        <div class="hist-sub">${sub}</div>
+        <div class="feed-title">${h.song.t}</div>
+        <div class="feed-sub">${sub}</div>
       </div>
-      <span class="hist-icon">${icon}</span>`;
-    historyEl.appendChild(div);
+      <span class="feed-icon">${icon}</span>`;
+    feedEl.appendChild(div);
   });
 }
 
-// ─────────────────────────────────────────────
-//  Results
-// ─────────────────────────────────────────────
+// ── Results ───────────────────────────────────
 function showResults() {
   document.getElementById('player-card').style.display = 'none';
   document.getElementById('search-wrap').style.display = 'none';
   document.getElementById('action-row').style.display = 'none';
 
-  const correct = history.filter(h => h.result === 'correct').length;
-  const emojis  = history.map(h => h.result === 'correct' ? '🟩' : h.result === 'skipped' ? '⬛' : '🟥').join('');
-  const titles  = [
+  const titles = [
     'Time for a deep listen 😬',
-    'You know at least one 🤙',
+    'You got one! 🤙',
     'Getting there 🎸',
-    'Strong knowledge 🎧',
+    'Solid knowledge 🎧',
     'Meshuggah expert 🔥',
-    'You ARE Tomas Haake 🥁',
+    'Inhuman. Are you Tomas Haake? 🥁',
   ];
-  const shareText = `Meshuggle\n${emojis}\n${correct}/${TOTAL}`;
+  const titleIdx = Math.min(score, titles.length - 1);
+  const correct = feed.filter(h => h.result === 'correct').length;
+  const wrongs  = feed.filter(h => h.result === 'wrong').length;
+  const skipped = feed.filter(h => h.result === 'skipped').length;
+  const shareText = `Meshuggle 🎸\nScore: ${score} songs\n⚾ Outs: ${outs}/${MAX_OUTS}  ✓ ${correct}  ✗ ${wrongs}  ⏭ ${skipped}`;
 
-  document.getElementById('result-title').textContent = titles[correct];
-  document.getElementById('result-sub').textContent = `${correct} of ${TOTAL} correct`;
+  document.getElementById('result-title').textContent = titles[titleIdx];
+  document.getElementById('result-sub').textContent = `${score} song${score !== 1 ? 's' : ''} identified before 3 outs`;
 
   const shareBox = document.getElementById('share-box');
   shareBox.textContent = shareText;
@@ -850,22 +993,18 @@ function showResults() {
 
   resultsEl.style.display = 'block';
 
-  // Name submit
   document.getElementById('name-submit').onclick = async () => {
     if (scoreSubmitted) return;
     const name = document.getElementById('name-input').value.trim();
     if (!name) { document.getElementById('name-error').textContent = 'Please enter a name.'; return; }
     if (name.length > 20) { document.getElementById('name-error').textContent = 'Max 20 characters.'; return; }
-
     const btn = document.getElementById('name-submit');
-    btn.disabled = true;
-    btn.textContent = '…';
-
+    btn.disabled = true; btn.textContent = '…';
     try {
       const res = await fetch('/.netlify/functions/leaderboard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, score: correct, rounds: TOTAL }),
+        body: JSON.stringify({ name, score }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -889,34 +1028,30 @@ function showResults() {
   document.getElementById('again-btn').onclick = init;
 }
 
-// ─────────────────────────────────────────────
-//  Leaderboard
-// ─────────────────────────────────────────────
+// ── Leaderboard ───────────────────────────────
 async function loadLeaderboard() {
   const el = document.getElementById('lb-content');
   el.innerHTML = '<div class="lb-loading"><span class="spin"></span>Loading…</div>';
   try {
     const res = await fetch('/.netlify/functions/leaderboard');
+    if (!res.ok) throw new Error('bad response');
     const entries = await res.json();
-    if (!entries.length) {
+    if (!Array.isArray(entries) || !entries.length) {
       el.innerHTML = '<div class="lb-empty">No scores yet — be the first!</div>';
       return;
     }
     const medals = ['🥇', '🥈', '🥉'];
-    const scoreClass = s => s === 5 ? 'lb-score-5' : s === 4 ? 'lb-score-4' : s >= 3 ? 'lb-score-3' : 'lb-score-low';
+    const sc = s => s >= 10 ? 'lb-score-hi' : s >= 5 ? 'lb-score-mid' : 'lb-score-low';
     const rows = entries.map((e, i) => `
       <tr>
         <td class="lb-rank">${medals[i] || `${i + 1}.`}</td>
         <td class="lb-name">${escHtml(e.name)}</td>
-        <td class="lb-score ${scoreClass(e.score)}">${e.score}/${TOTAL}</td>
-        <td class="lb-date">${e.date}</td>
-      </tr>
-    `).join('');
+        <td class="lb-score ${sc(e.score)}">${e.score}</td>
+        <td class="lb-date">${e.date || ''}</td>
+      </tr>`).join('');
     el.innerHTML = `
       <table class="lb-table">
-        <thead><tr>
-          <th>#</th><th>Name</th><th>Score</th><th>Date</th>
-        </tr></thead>
+        <thead><tr><th>#</th><th>Name</th><th>Score</th><th>Date</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
   } catch {
@@ -925,25 +1060,24 @@ async function loadLeaderboard() {
 }
 
 function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ─────────────────────────────────────────────
-//  Events
-// ─────────────────────────────────────────────
-playBtn.addEventListener('click', playClip);
+// ── Events ────────────────────────────────────
+playBtn.addEventListener('click', () => playClip(false));
+altBtn.addEventListener('click',  () => playClip(true));
 
 searchEl.addEventListener('input', e => {
   renderSuggestions(e.target.value);
-  if (!e.target.value) { chosen = null; submitBtn.disabled = true; }
+  if (!e.target.value) { searchEl._chosen = null; submitBtn.disabled = true; }
 });
 searchEl.addEventListener('blur', () => setTimeout(() => { sugBox.style.display = 'none'; }, 160));
 searchEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !submitBtn.disabled) submitGuess(); });
 
 submitBtn.addEventListener('click', submitGuess);
-skipBtn.addEventListener('click', () => resolve('skipped'));
+skipBtn.addEventListener('click', doSkip);
 
-// ─────────────────────────────────────────────
+// ── Start ─────────────────────────────────────
 init();
 </script>
 </body>
