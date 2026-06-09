@@ -1,6 +1,6 @@
-const UPSTASH_URL   = process.env.UPSTASH_REDIS_REST_URL;
-const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
-const LEADERBOARD_KEY = "meshuggle:leaderboard";
+const BASE_URL = process.env.UPSTASH_REDIS_REST_URL;
+const TOKEN    = process.env.UPSTASH_REDIS_REST_TOKEN;
+const KEY      = "meshuggle:leaderboard";
 const MAX_ENTRIES = 100;
 
 const CORS = {
@@ -29,14 +29,13 @@ function isValidName(name) {
   return isClean(t);
 }
 
-async function redis(command) {
-  const res = await fetch(UPSTASH_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${UPSTASH_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(command),
+// Upstash REST API: commands go in the URL path, not the body
+// e.g. GET https://<host>/zadd/mykey/1/member
+async function redis(...args) {
+  const path = args.map(a => encodeURIComponent(String(a))).join("/");
+  const res = await fetch(`${BASE_URL}/${path}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${TOKEN}` },
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error);
@@ -48,10 +47,18 @@ exports.handler = async function (event) {
     return { statusCode: 204, headers: CORS, body: "" };
   }
 
+  if (!BASE_URL || !TOKEN) {
+    return {
+      statusCode: 500,
+      headers: CORS,
+      body: JSON.stringify({ error: "Upstash credentials not configured" }),
+    };
+  }
+
   // GET — return top 20
   if (event.httpMethod === "GET") {
     try {
-      const raw = await redis(["ZREVRANGE", LEADERBOARD_KEY, 0, 19, "WITHSCORES"]);
+      const raw = await redis("ZREVRANGE", KEY, 0, 19, "WITHSCORES");
       const entries = [];
       for (let i = 0; i < raw.length; i += 2) {
         try {
@@ -87,7 +94,6 @@ exports.handler = async function (event) {
         };
       }
 
-      // Score is number of correct songs — any non-negative integer is valid
       const scoreNum = parseInt(score);
       if (isNaN(scoreNum) || scoreNum < 0 || scoreNum > 9999) {
         return {
@@ -103,11 +109,11 @@ exports.handler = async function (event) {
         date: new Date().toISOString().slice(0, 10),
       });
 
-      // Sort key: score * 1e9 + (1e9 - ms_since_epoch % 1e9) so ties go to earliest submission
+      // Sort key: higher score = higher rank; ties broken by earliest submission
       const sortKey = scoreNum * 1e9 + (1e9 - (Date.now() % 1e9));
 
-      await redis(["ZADD", LEADERBOARD_KEY, sortKey, entry]);
-      await redis(["ZREMRANGEBYRANK", LEADERBOARD_KEY, 0, -(MAX_ENTRIES + 1)]);
+      await redis("ZADD", KEY, sortKey, entry);
+      await redis("ZREMRANGEBYRANK", KEY, 0, -(MAX_ENTRIES + 1));
 
       return {
         statusCode: 200,

@@ -930,7 +930,7 @@ function resolve(result, guessName) {
 }
 
 function revealAndAdvance(wasOut) {
-  hintEl.textContent = `${wasOut ? '⚾ Out! ' : '⏭ '}Answer: ${song.t} — ${song.a}`;
+  hintEl.textContent = `${wasOut ? 'Out! ' : '⏭ '}Answer: ${song.t} — ${song.a}`;
   document.getElementById('search-wrap').style.display = 'none';
   document.getElementById('action-row').style.display = 'none';
   searchEl.disabled = true; submitBtn.disabled = true; skipBtn.disabled = true;
@@ -951,7 +951,7 @@ function addFeedItem(result, s, strikesUsed, guesses) {
 function addOutBanner() {
   const d = document.createElement('div');
   d.className = 'feed-item out-banner';
-  d.textContent = `⚾ Out ${outs} of ${MAX_OUTS}`;
+  d.textContent = `— Out ${outs} of ${MAX_OUTS} —`;
   feedScroll.insertBefore(d, feedScroll.firstChild);
 }
 
