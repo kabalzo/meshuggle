@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meshuggle 🎸</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0a0a0a;
+      --bg2:     #141414;
+      --bg3:     #1e1e1e;
+      --border:  #272727;
+      --border2: #383838;
+      --text:    #e8e8e8;
+      --text2:   #888;
+      --text3:   #4a4a4a;
+      --green:      #4ade80;
+      --green-bg:   #0a2016;
+      --green-b:    #14532d;
+      --red:        #f87171;
+      --red-bg:     #200a0a;
+      --red-b:      #7f1d1d;
+      --yellow:     #fbbf24;
+      --accent:     #a78bfa;
+      --accent-dim: #1e1433;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1rem 5rem;
+    }
+
+    #app { width: 100%; max-width: 540px; }
+
+    /* ── Header ── */
+    header { text-align: center; margin-bottom: 2rem; }
+    header h1 { font-size: 2.2rem; font-weight: 600; letter-spacing: -1.5px; }
+    header h1 em { font-style: normal; color: var(--accent); }
+    header p { font-size: 0.82rem; color: var(--text2); margin-top: 0.35rem; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .tab {
+      flex: 1; padding: 0.6rem;
+      background: transparent; border: none;
+      color: var(--text2); font-size: 0.82rem; font-weight: 500;
+      font-family: inherit; cursor: pointer;
+      transition: all 0.15s;
+      border-right: 1px solid var(--border);
+    }
+    .tab:last-child { border-right: none; }
+    .tab.active { background: var(--bg3); color: var(--text); }
+    .tab:hover:not(.active) { background: var(--bg2); }
+
+    /* ── Views ── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── Progress dots ── */
+    .dots { display: flex; justify-content: center; gap: 9px; margin-bottom: 1.75rem; }
+    .dot {
+      width: 13px; height: 13px; border-radius: 50%;
+      border: 1.5px solid var(--border2); background: transparent;
+      transition: all 0.25s;
+    }
+    .dot.active  { border-color: var(--accent); background: var(--accent-dim); }
+    .dot.correct { background: var(--green); border-color: var(--green); }
+    .dot.wrong   { background: var(--red);   border-color: var(--red); }
+    .dot.skipped { background: var(--bg3);   border-color: var(--border2); }
+
+    /* ── Player card ── */
+    #player-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 18px; padding: 1.75rem 1.5rem;
+      margin-bottom: 1rem;
+      display: flex; flex-direction: column; align-items: center; gap: 1.1rem;
+    }
+
+    #round-label {
+      font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text3);
+    }
+
+    #play-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.8rem 2.2rem; border-radius: 999px;
+      border: 1px solid var(--border2); background: var(--bg3);
+      color: var(--text); font-size: 1rem; font-weight: 500;
+      font-family: inherit; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.08s;
+      min-width: 160px; justify-content: center;
+    }
+    #play-btn:hover:not(:disabled) { background: #252525; border-color: var(--accent); }
+    #play-btn:active:not(:disabled) { transform: scale(0.96); }
+    #play-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    #prog-wrap {
+      width: 100%; height: 3px;
+      background: var(--bg3); border-radius: 2px; overflow: hidden;
+    }
+    #prog-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--green));
+      border-radius: 2px; transition: width 0.04s linear;
+    }
+
+    #hint { font-size: 0.8rem; color: var(--accent); min-height: 1.1em; text-align: center; }
+
+    /* ── Strike hearts ── */
+    .strikes { display: flex; gap: 6px; align-items: center; }
+    .strike-heart { font-size: 1.1rem; transition: all 0.2s; }
+    .strike-heart.lost { filter: grayscale(1); opacity: 0.25; }
+
+    /* ── Search ── */
+    #search-wrap { position: relative; margin-bottom: 0.6rem; }
+    #search-input {
+      width: 100%; padding: 0.75rem 1rem;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 11px; color: var(--text);
+      font-size: 0.95rem; font-family: inherit;
+      outline: none; transition: border-color 0.15s;
+    }
+    #search-input:focus { border-color: var(--accent); }
+    #search-input::placeholder { color: var(--text3); }
+    #search-input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #suggestions {
+      display: none; position: absolute;
+      top: calc(100% + 5px); left: 0; right: 0;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 11px; overflow: hidden;
+      max-height: 270px; overflow-y: auto; z-index: 50;
+    }
+    .sug {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.6rem 1rem; cursor: pointer;
+      border-bottom: 1px solid var(--border); transition: background 0.1s;
+    }
+    .sug:last-child { border-bottom: none; }
+    .sug:hover { background: var(--bg3); }
+    .sug-title { font-size: 0.88rem; }
+    .sug-meta  { font-size: 0.72rem; color: var(--text2); text-align: right; line-height: 1.4; }
+
+    /* ── Actions ── */
+    #action-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+    #submit-btn, #skip-btn {
+      flex: 1; padding: 0.72rem 1rem;
+      border-radius: 11px; font-size: 0.88rem; font-weight: 500;
+      font-family: inherit; cursor: pointer; border: 1px solid var(--border2);
+      transition: all 0.15s;
+    }
+    #submit-btn { background: var(--accent); color: #0a0a0a; border-color: var(--accent); }
+    #submit-btn:hover:not(:disabled) { opacity: 0.88; }
+    #submit-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+    #skip-btn { background: transparent; color: var(--text2); }
+    #skip-btn:hover:not(:disabled) { background: var(--bg3); color: var(--text); }
+    #skip-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+    /* ── History ── */
+    #history { margin-top: 0.25rem; }
+    .hist-label {
+      font-size: 0.68rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.5rem;
+    }
+    .hist-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.65rem 1rem; border-radius: 10px;
+      border: 1px solid var(--border); margin-bottom: 5px; font-size: 0.85rem;
+    }
+    .hist-item.correct { border-color: var(--green-b); background: var(--green-bg); }
+    .hist-item.wrong   { border-color: var(--red-b);   background: var(--red-bg); }
+    .hist-item.skipped { background: var(--bg2); color: var(--text2); }
+    .hist-title { font-weight: 500; }
+    .hist-sub   { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+    .hist-item.correct .hist-sub { color: var(--green); opacity: 0.65; }
+    .hist-item.wrong   .hist-sub { color: var(--red);   opacity: 0.65; }
+    .hist-icon { font-size: 0.95rem; flex-shrink: 0; margin-left: 10px; }
+
+    /* ── Results / name entry ── */
+    #results { display: none; }
+    .results-inner { text-align: center; padding: 1.5rem 0.5rem 0; }
+    .results-inner h2 { font-size: 1.55rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .results-inner .score-sub { font-size: 0.85rem; color: var(--text2); margin-bottom: 1.5rem; }
+
+    #share-box {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem; line-height: 1.9;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 13px; padding: 1.25rem; margin-bottom: 0.5rem;
+      white-space: pre; cursor: pointer; transition: border-color 0.15s; user-select: none;
+    }
+    #share-box:hover { border-color: var(--accent); }
+    #copy-tip { font-size: 0.72rem; color: var(--text3); margin-bottom: 1.5rem; }
+
+    /* Name entry */
+    .name-entry {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.25rem; margin-bottom: 1rem; text-align: left;
+    }
+    .name-entry label {
+      display: block; font-size: 0.78rem; color: var(--text2);
+      margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .name-row { display: flex; gap: 8px; }
+    .name-input {
+      flex: 1; padding: 0.65rem 0.9rem;
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: 9px; color: var(--text);
+      font-size: 0.92rem; font-family: inherit; outline: none;
+      transition: border-color 0.15s;
+    }
+    .name-input:focus { border-color: var(--accent); }
+    .name-input::placeholder { color: var(--text3); }
+    .name-submit {
+      padding: 0.65rem 1.1rem;
+      background: var(--accent); color: #0a0a0a;
+      border: none; border-radius: 9px;
+      font-size: 0.88rem; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+    }
+    .name-submit:hover { opacity: 0.88; }
+    .name-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+    .name-error { font-size: 0.75rem; color: var(--red); margin-top: 0.5rem; min-height: 1em; }
+    .name-skip {
+      display: block; margin-top: 0.6rem; font-size: 0.75rem;
+      color: var(--text3); cursor: pointer; background: none; border: none;
+      font-family: inherit; text-decoration: underline;
+    }
+    .name-skip:hover { color: var(--text2); }
+
+    #again-btn {
+      padding: 0.75rem 2.2rem; border-radius: 999px;
+      border: 1px solid var(--border2); background: var(--bg2);
+      color: var(--text); font-size: 0.92rem; font-weight: 500;
+      font-family: inherit; cursor: pointer; margin-top: 0.5rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    #again-btn:hover { background: var(--bg3); border-color: var(--accent); }
+
+    /* ── Leaderboard ── */
+    #leaderboard-view { padding: 0.25rem 0; }
+    .lb-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1rem;
+    }
+    .lb-title { font-size: 1rem; font-weight: 500; }
+    .lb-refresh {
+      font-size: 0.75rem; color: var(--text2); cursor: pointer;
+      background: none; border: none; font-family: inherit;
+      padding: 0.3rem 0.6rem; border-radius: 6px;
+      border: 1px solid var(--border); transition: all 0.15s;
+    }
+    .lb-refresh:hover { background: var(--bg3); color: var(--text); }
+
+    .lb-table { width: 100%; border-collapse: collapse; }
+    .lb-table th {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text3); padding: 0.4rem 0.75rem; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .lb-table th:last-child { text-align: right; }
+    .lb-table td {
+      padding: 0.6rem 0.75rem; font-size: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .lb-table td:last-child { text-align: right; }
+    .lb-table tr:last-child td { border-bottom: none; }
+    .lb-table tr:hover td { background: var(--bg2); }
+
+    .lb-rank { color: var(--text3); font-size: 0.78rem; width: 30px; }
+    .lb-name { font-weight: 500; }
+    .lb-score { font-family: 'JetBrains Mono', monospace; }
+    .lb-date  { color: var(--text3); font-size: 0.75rem; }
+
+    .lb-medal-1 { color: #fbbf24; }
+    .lb-medal-2 { color: #d1d5db; }
+    .lb-medal-3 { color: #cd7c3f; }
+
+    .lb-score-5 { color: var(--green); }
+    .lb-score-4 { color: #86efac; }
+    .lb-score-3 { color: var(--yellow); }
+    .lb-score-low { color: var(--text2); }
+
+    .lb-empty { text-align: center; padding: 2rem; color: var(--text3); font-size: 0.85rem; }
+    .lb-loading { text-align: center; padding: 1.5rem; color: var(--text3); font-size: 0.85rem; }
+
+    /* ── Spinner ── */
+    .spin {
+      display: inline-block; width: 11px; height: 11px;
+      border: 1.5px solid var(--text3); border-top-color: var(--accent);
+      border-radius: 50%; animation: rot 0.65s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes rot { to { transform: rotate(360deg); } }
+
+    /* ── Submitted badge ── */
+    .submitted-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.8rem; color: var(--green);
+      background: var(--green-bg); border: 1px solid var(--green-b);
+      border-radius: 8px; padding: 0.4rem 0.8rem; margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Mesh<em>uggle</em> 🎸</h1>
+    <p>2-second clip · 3 strikes per round · guess the Meshuggah song</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('game')">Game</button>
+    <button class="tab" onclick="switchTab('leaderboard')">Leaderboard</button>
+  </div>
+
+  <!-- ── GAME VIEW ── -->
+  <div id="game-view" class="view active">
+    <div class="dots" id="dots"></div>
+
+    <div id="player-card">
+      <div id="round-label">Round <span id="round-num">1</span> of 5</div>
+      <button id="play-btn">▶&nbsp; Play clip</button>
+      <div id="prog-wrap"><div id="prog-fill"></div></div>
+      <div id="hint"></div>
+      <div class="strikes" id="strikes">
+        <span class="strike-heart" id="h0">❤️</span>
+        <span class="strike-heart" id="h1">❤️</span>
+        <span class="strike-heart" id="h2">❤️</span>
+      </div>
+    </div>
+
+    <div id="search-wrap">
+      <input id="search-input" type="text" placeholder="Search for a song…" autocomplete="off" spellcheck="false" />
+      <div id="suggestions"></div>
+    </div>
+
+    <div id="action-row">
+      <button id="submit-btn" disabled>Submit guess</button>
+      <button id="skip-btn">Skip →</button>
+    </div>
+
+    <div id="history"></div>
+
+    <!-- Results panel -->
+    <div id="results">
+      <div class="results-inner">
+        <h2 id="result-title"></h2>
+        <p class="score-sub" id="result-sub"></p>
+        <div id="share-box"></div>
+        <p id="copy-tip">click to copy</p>
+
+        <!-- Name entry for leaderboard -->
+        <div class="name-entry" id="name-entry">
+          <label>Add your score to the leaderboard</label>
+          <div class="name-row">
+            <input class="name-input" id="name-input" type="text" maxlength="20" placeholder="Your name…" autocomplete="off" spellcheck="false" />
+            <button class="name-submit" id="name-submit">Submit</button>
+          </div>
+          <div class="name-error" id="name-error"></div>
+          <button class="name-skip" id="name-skip">skip, just play again</button>
+        </div>
+
+        <div id="submitted-area" style="display:none; text-align:center; margin-bottom:1rem;">
+          <span class="submitted-badge">✓ Score submitted!</span>
+        </div>
+
+        <button id="again-btn">Play again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LEADERBOARD VIEW ── -->
+  <div id="leaderboard-view" class="view">
+    <div class="lb-header">
+      <span class="lb-title">Top scores</span>
+      <button class="lb-refresh" onclick="loadLeaderboard()">↻ Refresh</button>
+    </div>
+    <div id="lb-content">
+      <div class="lb-loading"><span class="spin"></span>Loading…</div>
+    </div>
+  </div>
+</div>
+
+<audio id="audio" preload="none"></audio>
+
+<script>
+// ─────────────────────────────────────────────
+//  Song list
+// ─────────────────────────────────────────────
+const ALL_SONGS = [
+  // Contradictions Collapse (1991)
+  {t:"Paralyzing Ignorance",         a:"Contradictions Collapse", y:1991},
+  {t:"Cadaverous Mastication",        a:"Contradictions Collapse", y:1991},
+  {t:"Abnegating Cecity",             a:"Contradictions Collapse", y:1991},
+  {t:"Internal Evidence",             a:"Contradictions Collapse", y:1991},
+  {t:"Qualms of Reality",             a:"Contradictions Collapse", y:1991},
+  {t:"We'll Never See the Day",       a:"Contradictions Collapse", y:1991},
+  {t:"Greed",                         a:"Contradictions Collapse", y:1991},
+  {t:"Choirs of Devastation",         a:"Contradictions Collapse", y:1991},
+  // None EP (1994)
+  {t:"Humiliative",                   a:"None EP",                 y:1994},
+  {t:"Silhouette",                    a:"None EP",                 y:1994},
+  {t:"Fuelled",                       a:"None EP",                 y:1994},
+  {t:"Sickening",                     a:"None EP",                 y:1994},
+  // Destroy Erase Improve (1995)
+  {t:"Future Breed Machine",          a:"Destroy Erase Improve",   y:1995},
+  {t:"Beneath",                       a:"Destroy Erase Improve",   y:1995},
+  {t:"Soul Burn",                     a:"Destroy Erase Improve",   y:1995},
+  {t:"Transfixion",                   a:"Destroy Erase Improve",   y:1995},
+  {t:"Vanished",                      a:"Destroy Erase Improve",   y:1995},
+  {t:"Acrid Placidity",               a:"Destroy Erase Improve",   y:1995},
+  {t:"Inside What's Within Behind",   a:"Destroy Erase Improve",   y:1995},
+  {t:"Terminal Illusions",            a:"Destroy Erase Improve",   y:1995},
+  {t:"Suffer in Truth",               a:"Destroy Erase Improve",   y:1995},
+  {t:"Sublevels",                     a:"Destroy Erase Improve",   y:1995},
+  {t:"Ritual",                        a:"Destroy Erase Improve",   y:1995},
+  // The True Human Design EP (1997)
+  {t:"Sane",                          a:"The True Human Design",   y:1997},
+  {t:"Corridors of Chameleons",       a:"The True Human Design",   y:1997},
+  // Chaosphere (1998)
+  {t:"Concatenation",                 a:"Chaosphere",              y:1998},
+  {t:"New Millennium Cyanide Christ", a:"Chaosphere",              y:1998},
+  {t:"Corridor of Chameleons",        a:"Chaosphere",              y:1998},
+  {t:"Neurotica",                     a:"Chaosphere",              y:1998},
+  {t:"The Mouth Licking What You've Bled", a:"Chaosphere",         y:1998},
+  {t:"The Exquisite Machinery of Torture", a:"Chaosphere",         y:1998},
+  {t:"Elastic",                       a:"Chaosphere",              y:1998},
+  // Nothing (2002)
+  {t:"Stengah",                       a:"Nothing",                 y:2002},
+  {t:"Rational Gaze",                 a:"Nothing",                 y:2002},
+  {t:"Perpetual Black Second",        a:"Nothing",                 y:2002},
+  {t:"Closed Eye Visuals",            a:"Nothing",                 y:2002},
+  {t:"Glints Collide",                a:"Nothing",                 y:2002},
+  {t:"Organic Shadows",               a:"Nothing",                 y:2002},
+  {t:"Straws Pulled at Random",       a:"Nothing",                 y:2002},
+  {t:"Spasm",                         a:"Nothing",                 y:2002},
+  {t:"Nebulous",                      a:"Nothing",                 y:2002},
+  {t:"Obsidian",                      a:"Nothing",                 y:2002},
+  // I EP (2004)
+  {t:"I",                             a:"I EP",                    y:2004},
+  // Catch Thirtythree (2005)
+  {t:"Autonomy Lost",                 a:"Catch Thirtythree",       y:2005},
+  {t:"Imprint of the Un-Saved",       a:"Catch Thirtythree",       y:2005},
+  {t:"Disenchantment",                a:"Catch Thirtythree",       y:2005},
+  {t:"The Paradoxical Spiral",        a:"Catch Thirtythree",       y:2005},
+  {t:"Re-Inanimate",                  a:"Catch Thirtythree",       y:2005},
+  {t:"Entrapment",                    a:"Catch Thirtythree",       y:2005},
+  {t:"Mind's Mirrors",                a:"Catch Thirtythree",       y:2005},
+  {t:"In Death - Is Life",            a:"Catch Thirtythree",       y:2005},
+  {t:"In Death - Is Death",           a:"Catch Thirtythree",       y:2005},
+  {t:"Shed",                          a:"Catch Thirtythree",       y:2005},
+  {t:"Personae Non Gratae",           a:"Catch Thirtythree",       y:2005},
+  {t:"Dehumanization",                a:"Catch Thirtythree",       y:2005},
+  {t:"Sum",                           a:"Catch Thirtythree",       y:2005},
+  // obZen (2008)
+  {t:"Combustion",                    a:"obZen",                   y:2008},
+  {t:"Electric Red",                  a:"obZen",                   y:2008},
+  {t:"Bleed",                         a:"obZen",                   y:2008},
+  {t:"Lethargica",                    a:"obZen",                   y:2008},
+  {t:"obZen",                         a:"obZen",                   y:2008},
+  {t:"This Spiteful Snake",           a:"obZen",                   y:2008},
+  {t:"Pineal Gland Optics",           a:"obZen",                   y:2008},
+  {t:"Pravus",                        a:"obZen",                   y:2008},
+  {t:"Dancers to a Discordant System",a:"obZen",                   y:2008},
+  // Koloss (2012)
+  {t:"I Am Colossus",                 a:"Koloss",                  y:2012},
+  {t:"The Demon's Name Is Surveillance", a:"Koloss",               y:2012},
+  {t:"Do Not Look Down",              a:"Koloss",                  y:2012},
+  {t:"Behind the Sun",                a:"Koloss",                  y:2012},
+  {t:"The Hurt That Finds You First", a:"Koloss",                  y:2012},
+  {t:"Marrow",                        a:"Koloss",                  y:2012},
+  {t:"Break Those Bones Whose Sinews Gave It Motion", a:"Koloss",  y:2012},
+  {t:"Swarm",                         a:"Koloss",                  y:2012},
+  {t:"Demiurge",                      a:"Koloss",                  y:2012},
+  {t:"The Last Vigil",                a:"Koloss",                  y:2012},
+  // The Violent Sleep of Reason (2016)
+  {t:"Clockworks",                    a:"The Violent Sleep of Reason", y:2016},
+  {t:"Born in Dissonance",            a:"The Violent Sleep of Reason", y:2016},
+  {t:"MonstroCity",                   a:"The Violent Sleep of Reason", y:2016},
+  {t:"By the Ton",                    a:"The Violent Sleep of Reason", y:2016},
+  {t:"Violent Sleep of Reason",       a:"The Violent Sleep of Reason", y:2016},
+  {t:"Ivory Tower",                   a:"The Violent Sleep of Reason", y:2016},
+  {t:"Stifled",                       a:"The Violent Sleep of Reason", y:2016},
+  {t:"Nostrum",                       a:"The Violent Sleep of Reason", y:2016},
+  {t:"Our Rage Won't Die",            a:"The Violent Sleep of Reason", y:2016},
+  {t:"Into Decay",                    a:"The Violent Sleep of Reason", y:2016},
+  // Immutable (2022)
+  {t:"Broken Cog",                    a:"Immutable",               y:2022},
+  {t:"The Abysmal Eye",               a:"Immutable",               y:2022},
+  {t:"Light the Shortening Fuse",     a:"Immutable",               y:2022},
+  {t:"Phantoms",                      a:"Immutable",               y:2022},
+  {t:"Ligature Marks",                a:"Immutable",               y:2022},
+  {t:"God He Sees in Mirrors",        a:"Immutable",               y:2022},
+  {t:"They Move Below",               a:"Immutable",               y:2022},
+  {t:"Kaleidoscope",                  a:"Immutable",               y:2022},
+  {t:"Black Cathedral",               a:"Immutable",               y:2022},
+  {t:"I Am That Thirst",              a:"Immutable",               y:2022},
+  {t:"The Faultless",                 a:"Immutable",               y:2022},
+  {t:"Armies of the Preposterous",    a:"Immutable",               y:2022},
+  {t:"Past Tense",                    a:"Immutable",               y:2022},
+];
+
+// ─────────────────────────────────────────────
+//  Constants & state
+// ─────────────────────────────────────────────
+const TOTAL   = 5;
+const MAX_STR = 3; // strikes per round
+const CLIP_MS = 2000;
+
+let rounds = [], round = 0, strikes = 0;
+let chosen = null, history = [];
+let previewCache = {};
+let progTimer = null;
+let canPlay = true;
+let scoreSubmitted = false;
+
+// ─────────────────────────────────────────────
+//  DOM
+// ─────────────────────────────────────────────
+const audio     = document.getElementById('audio');
+const playBtn   = document.getElementById('play-btn');
+const progFill  = document.getElementById('prog-fill');
+const hintEl    = document.getElementById('hint');
+const searchEl  = document.getElementById('search-input');
+const sugBox    = document.getElementById('suggestions');
+const submitBtn = document.getElementById('submit-btn');
+const skipBtn   = document.getElementById('skip-btn');
+const historyEl = document.getElementById('history');
+const resultsEl = document.getElementById('results');
+
+audio.volume = 0.6;
+
+// ─────────────────────────────────────────────
+//  Tab switching
+// ─────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0) === (tab === 'game'));
+  });
+  document.getElementById('game-view').classList.toggle('active', tab === 'game');
+  document.getElementById('leaderboard-view').classList.toggle('active', tab === 'leaderboard');
+  if (tab === 'leaderboard') loadLeaderboard();
+}
+
+// ─────────────────────────────────────────────
+//  iTunes preview fetch
+// ─────────────────────────────────────────────
+async function fetchPreview(song) {
+  const key = song.t;
+  if (key in previewCache) return previewCache[key];
+  previewCache[key] = null;
+  try {
+    const q = encodeURIComponent(`meshuggah ${song.t}`);
+    const res = await fetch(`https://itunes.apple.com/search?term=${q}&entity=song&media=music&limit=8`);
+    const data = await res.json();
+    const items = data.results || [];
+    const tl = song.t.toLowerCase();
+    const match = items.find(i => i.trackName?.toLowerCase() === tl && i.previewUrl)
+                || items.find(i => i.trackName?.toLowerCase().includes(tl) && i.previewUrl)
+                || items.find(i => i.previewUrl);
+    previewCache[key] = match?.previewUrl || null;
+    return previewCache[key];
+  } catch {
+    previewCache[key] = null;
+    return null;
+  }
+}
+
+function prefetchNext() {
+  if (round + 1 < TOTAL) fetchPreview(rounds[round + 1]);
+}
+
+// ─────────────────────────────────────────────
+//  Shuffle
+// ─────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ─────────────────────────────────────────────
+//  Init / setup
+// ─────────────────────────────────────────────
+function init() {
+  rounds = shuffle(ALL_SONGS).slice(0, TOTAL);
+  round = 0; strikes = 0; history = []; previewCache = {};
+  scoreSubmitted = false;
+  resultsEl.style.display = 'none';
+  document.getElementById('player-card').style.display = '';
+  document.getElementById('search-wrap').style.display = '';
+  document.getElementById('action-row').style.display = '';
+  historyEl.innerHTML = '';
+  renderDots();
+  setupRound();
+}
+
+function setupRound() {
+  chosen = null; canPlay = true; strikes = 0;
+  submitBtn.disabled = true;
+  skipBtn.disabled = false;
+  searchEl.disabled = false;
+  searchEl.value = '';
+  sugBox.style.display = 'none';
+  document.getElementById('round-num').textContent = round + 1;
+  progFill.style.width = '0%';
+  hintEl.textContent = '';
+  playBtn.disabled = false;
+  playBtn.innerHTML = '▶&nbsp; Play clip';
+  document.getElementById('search-wrap').style.display = '';
+  document.getElementById('action-row').style.display = '';
+  updateStrikes();
+  fetchPreview(rounds[round]).then(prefetchNext);
+}
+
+function updateStrikes() {
+  for (let i = 0; i < 3; i++) {
+    document.getElementById(`h${i}`).classList.toggle('lost', i < strikes);
+  }
+}
+
+function renderDots() {
+  const el = document.getElementById('dots');
+  el.innerHTML = '';
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    const h = history[i];
+    d.className = 'dot' + (h ? ` ${h.result}` : i === round ? ' active' : '');
+    el.appendChild(d);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  Playback
+// ─────────────────────────────────────────────
+async function playClip() {
+  if (!canPlay) return;
+  canPlay = false;
+  playBtn.disabled = true;
+  playBtn.innerHTML = '<span class="spin"></span>Loading…';
+
+  const url = await fetchPreview(rounds[round]);
+
+  if (!url) {
+    hintEl.innerHTML = '<span style="color:var(--red)">No preview available — skip to continue</span>';
+    playBtn.innerHTML = '▶&nbsp; Play clip';
+    playBtn.disabled = false;
+    canPlay = true;
+    return;
+  }
+
+  const start = Math.floor(Math.random() * 22);
+  audio.src = url;
+  audio.currentTime = start;
+  audio.volume = 0.6;
+
+  playBtn.innerHTML = '■&nbsp; Playing…';
+  progFill.style.width = '0%';
+
+  try { await audio.play(); }
+  catch {
+    hintEl.textContent = 'Tap Play to start audio';
+    playBtn.innerHTML = '▶&nbsp; Play clip';
+    playBtn.disabled = false;
+    canPlay = true;
+    return;
+  }
+
+  const t0 = Date.now();
+  clearInterval(progTimer);
+  progTimer = setInterval(() => {
+    progFill.style.width = Math.min(100, ((Date.now() - t0) / CLIP_MS) * 100) + '%';
+  }, 40);
+
+  setTimeout(() => {
+    audio.pause();
+    clearInterval(progTimer);
+    progFill.style.width = '100%';
+    playBtn.innerHTML = '▶&nbsp; Replay';
+    playBtn.disabled = false;
+    canPlay = true;
+  }, CLIP_MS);
+}
+
+// ─────────────────────────────────────────────
+//  Search
+// ─────────────────────────────────────────────
+function renderSuggestions(q) {
+  if (!q.trim()) { sugBox.style.display = 'none'; return; }
+  const low = q.toLowerCase();
+  const hits = ALL_SONGS.filter(s => s.t.toLowerCase().includes(low)).slice(0, 10);
+  if (!hits.length) { sugBox.style.display = 'none'; return; }
+  sugBox.innerHTML = '';
+  hits.forEach(s => {
+    const d = document.createElement('div');
+    d.className = 'sug';
+    d.innerHTML = `<span class="sug-title">${s.t}</span><span class="sug-meta">${s.a}<br>${s.y}</span>`;
+    d.addEventListener('mousedown', e => { e.preventDefault(); pick(s); });
+    sugBox.appendChild(d);
+  });
+  sugBox.style.display = 'block';
+}
+
+function pick(s) {
+  chosen = s;
+  searchEl.value = s.t;
+  sugBox.style.display = 'none';
+  submitBtn.disabled = false;
+}
+
+// ─────────────────────────────────────────────
+//  Guess logic
+// ─────────────────────────────────────────────
+function submitGuess() {
+  if (!chosen) return;
+  const correct = chosen.t.toLowerCase() === rounds[round].t.toLowerCase();
+  resolve(correct ? 'correct' : 'wrong');
+}
+
+function resolve(result) {
+  audio.pause(); clearInterval(progTimer);
+  const song = rounds[round];
+
+  if (result === 'correct') {
+    history.push({ result: 'correct', song, strikes });
+    renderDots(); renderHistory();
+    advance();
+    return;
+  }
+
+  if (result === 'skipped') {
+    history.push({ result: 'skipped', song });
+    renderDots(); renderHistory();
+    revealAnswer(song);
+    setTimeout(advance, 2400);
+    return;
+  }
+
+  // Wrong guess
+  strikes++;
+  updateStrikes();
+
+  if (strikes >= MAX_STR) {
+    history.push({ result: 'wrong', song });
+    renderDots(); renderHistory();
+    revealAnswer(song);
+    setTimeout(advance, 2400);
+    return;
+  }
+
+  // Still have strikes — give hint
+  chosen = null; searchEl.value = ''; submitBtn.disabled = true;
+  sugBox.style.display = 'none';
+  const hints = ['', `Hint: album — "${song.a}"`, `Hint: released ${song.y}`];
+  hintEl.textContent = hints[strikes] || '';
+}
+
+function revealAnswer(song) {
+  hintEl.textContent = `✗  ${song.t} — ${song.a} (${song.y})`;
+  document.getElementById('search-wrap').style.display = 'none';
+  document.getElementById('action-row').style.display = 'none';
+  searchEl.disabled = true;
+  submitBtn.disabled = true;
+  skipBtn.disabled = true;
+}
+
+function advance() {
+  round++;
+  strikes = 0;
+  if (round >= TOTAL) { setTimeout(showResults, 700); return; }
+  setTimeout(() => { renderDots(); setupRound(); }, 350);
+}
+
+// ─────────────────────────────────────────────
+//  History
+// ─────────────────────────────────────────────
+function renderHistory() {
+  if (!history.length) { historyEl.innerHTML = ''; return; }
+  historyEl.innerHTML = '<p class="hist-label">This game</p>';
+  history.slice().reverse().forEach(h => {
+    const icon = h.result === 'correct' ? '✓' : h.result === 'skipped' ? '—' : '✗';
+    const sub  = h.result === 'correct'
+      ? `${h.song.a} · ${h.song.y} · ${h.strikes === 0 ? 'first try!' : `${h.strikes} strike${h.strikes > 1 ? 's' : ''}`}`
+      : `${h.song.a} · ${h.song.y}`;
+    const div = document.createElement('div');
+    div.className = `hist-item ${h.result}`;
+    div.innerHTML = `
+      <div>
+        <div class="hist-title">${h.song.t}</div>
+        <div class="hist-sub">${sub}</div>
+      </div>
+      <span class="hist-icon">${icon}</span>`;
+    historyEl.appendChild(div);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  Results
+// ─────────────────────────────────────────────
+function showResults() {
+  document.getElementById('player-card').style.display = 'none';
+  document.getElementById('search-wrap').style.display = 'none';
+  document.getElementById('action-row').style.display = 'none';
+
+  const correct = history.filter(h => h.result === 'correct').length;
+  const emojis  = history.map(h => h.result === 'correct' ? '🟩' : h.result === 'skipped' ? '⬛' : '🟥').join('');
+  const titles  = [
+    'Time for a deep listen 😬',
+    'You know at least one 🤙',
+    'Getting there 🎸',
+    'Strong knowledge 🎧',
+    'Meshuggah expert 🔥',
+    'You ARE Tomas Haake 🥁',
+  ];
+  const shareText = `Meshuggle\n${emojis}\n${correct}/${TOTAL}`;
+
+  document.getElementById('result-title').textContent = titles[correct];
+  document.getElementById('result-sub').textContent = `${correct} of ${TOTAL} correct`;
+
+  const shareBox = document.getElementById('share-box');
+  shareBox.textContent = shareText;
+  shareBox.onclick = () => {
+    navigator.clipboard.writeText(shareText).catch(() => {});
+    document.getElementById('copy-tip').textContent = 'Copied!';
+    setTimeout(() => { document.getElementById('copy-tip').textContent = 'click to copy'; }, 2000);
+  };
+
+  document.getElementById('submitted-area').style.display = 'none';
+  document.getElementById('name-entry').style.display = '';
+  document.getElementById('name-input').value = '';
+  document.getElementById('name-error').textContent = '';
+
+  resultsEl.style.display = 'block';
+
+  // Name submit
+  document.getElementById('name-submit').onclick = async () => {
+    if (scoreSubmitted) return;
+    const name = document.getElementById('name-input').value.trim();
+    if (!name) { document.getElementById('name-error').textContent = 'Please enter a name.'; return; }
+    if (name.length > 20) { document.getElementById('name-error').textContent = 'Max 20 characters.'; return; }
+
+    const btn = document.getElementById('name-submit');
+    btn.disabled = true;
+    btn.textContent = '…';
+
+    try {
+      const res = await fetch('/.netlify/functions/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, score: correct, rounds: TOTAL }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        document.getElementById('name-error').textContent = data.error || 'Submission failed.';
+        btn.disabled = false; btn.textContent = 'Submit';
+        return;
+      }
+      scoreSubmitted = true;
+      document.getElementById('name-entry').style.display = 'none';
+      document.getElementById('submitted-area').style.display = 'block';
+    } catch {
+      document.getElementById('name-error').textContent = 'Network error — try again.';
+      btn.disabled = false; btn.textContent = 'Submit';
+    }
+  };
+
+  document.getElementById('name-skip').onclick = () => {
+    document.getElementById('name-entry').style.display = 'none';
+  };
+
+  document.getElementById('again-btn').onclick = init;
+}
+
+// ─────────────────────────────────────────────
+//  Leaderboard
+// ─────────────────────────────────────────────
+async function loadLeaderboard() {
+  const el = document.getElementById('lb-content');
+  el.innerHTML = '<div class="lb-loading"><span class="spin"></span>Loading…</div>';
+  try {
+    const res = await fetch('/.netlify/functions/leaderboard');
+    const entries = await res.json();
+    if (!entries.length) {
+      el.innerHTML = '<div class="lb-empty">No scores yet — be the first!</div>';
+      return;
+    }
+    const medals = ['🥇', '🥈', '🥉'];
+    const scoreClass = s => s === 5 ? 'lb-score-5' : s === 4 ? 'lb-score-4' : s >= 3 ? 'lb-score-3' : 'lb-score-low';
+    const rows = entries.map((e, i) => `
+      <tr>
+        <td class="lb-rank">${medals[i] || `${i + 1}.`}</td>
+        <td class="lb-name">${escHtml(e.name)}</td>
+        <td class="lb-score ${scoreClass(e.score)}">${e.score}/${TOTAL}</td>
+        <td class="lb-date">${e.date}</td>
+      </tr>
+    `).join('');
+    el.innerHTML = `
+      <table class="lb-table">
+        <thead><tr>
+          <th>#</th><th>Name</th><th>Score</th><th>Date</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  } catch {
+    el.innerHTML = '<div class="lb-empty">Failed to load — try refreshing.</div>';
+  }
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────
+//  Events
+// ─────────────────────────────────────────────
+playBtn.addEventListener('click', playClip);
+
+searchEl.addEventListener('input', e => {
+  renderSuggestions(e.target.value);
+  if (!e.target.value) { chosen = null; submitBtn.disabled = true; }
+});
+searchEl.addEventListener('blur', () => setTimeout(() => { sugBox.style.display = 'none'; }, 160));
+searchEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !submitBtn.disabled) submitGuess(); });
+
+submitBtn.addEventListener('click', submitGuess);
+skipBtn.addEventListener('click', () => resolve('skipped'));
+
+// ─────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
