@@ -78,7 +78,7 @@
     #search-input:focus { border-color: var(--accent); }
     #search-input::placeholder { color: var(--text3); }
     #search-input:disabled { opacity: 0.3; cursor: not-allowed; }
-    #suggestions { display: none; position: absolute; bottom: calc(100% + 5px); left: 0; right: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; overflow: hidden; max-height: 220px; overflow-y: auto; z-index: 50; }
+    #suggestions { display: none; position: absolute; top: calc(100% + 5px); left: 0; right: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; overflow: hidden; max-height: 200px; overflow-y: auto; z-index: 50; }
     .sug { display: flex; justify-content: space-between; align-items: center; padding: 0.48rem 0.9rem; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; font-size: 0.8rem; }
     .sug:last-child { border-bottom: none; }
     .sug:hover { background: var(--bg3); }
@@ -122,6 +122,16 @@
     .lb-score { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; flex-shrink: 0; }
     .lb-date { font-size: 0.62rem; color: var(--text3); flex-shrink: 0; }
     .lb-tag { font-size: 0.6rem; color: var(--text3); margin-left: 3px; font-family: 'JetBrains Mono', monospace; }
+    /* Album filter */
+    #filter-bar { flex-shrink: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 0.45rem 0.75rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    #filter-toggle { font-size: 0.7rem; color: var(--text2); cursor: pointer; background: none; border: 1px solid var(--border2); border-radius: 6px; padding: 0.2rem 0.5rem; font-family: inherit; white-space: nowrap; transition: all 0.15s; flex-shrink: 0; }
+    #filter-toggle:hover { background: var(--bg3); color: var(--text); }
+    #filter-chips { display: none; flex-wrap: wrap; gap: 4px; align-items: center; }
+    #filter-chips.open { display: flex; }
+    .fchip { font-size: 0.68rem; padding: 0.18rem 0.5rem; border-radius: 999px; border: 1px solid var(--border2); background: var(--bg3); color: var(--text2); cursor: pointer; white-space: nowrap; transition: all 0.15s; user-select: none; }
+    .fchip:hover { border-color: var(--accent); color: var(--text); }
+    .fchip.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+    .fchip.all-chip.on { background: var(--accent); color: #0a0a0a; border-color: var(--accent); }
     .lb-score.hi { color: var(--green); }
     .lb-score.mid { color: var(--yellow); }
     .lb-score.lo { color: var(--text2); }
@@ -137,6 +147,11 @@
   <div id="header">
     <h1>Mesh<em>uggle</em> 🎸</h1>
     <p>3 strikes = out &nbsp;·&nbsp; 3 outs = game over &nbsp;·&nbsp; 3 skips per game</p>
+  </div>
+
+  <div id="filter-bar">
+    <button id="filter-toggle">🎛 Albums ▾</button>
+    <div id="filter-chips"></div>
   </div>
 
   <div id="stats">
@@ -333,7 +348,7 @@ const histEl=document.getElementById('history-scroll');
 const resultsEl=document.getElementById('results');
 audio.volume=0.6;
 
-function refillDeck(){let p=ALL_SONGS.filter(s=>!used.has(s.t));if(p.length<5){used.clear();p=[...ALL_SONGS];}deck=shuffle(p);}
+function refillDeck(){let p=filteredSongs().filter(s=>!used.has(s.t));if(p.length<5){used.clear();p=filteredSongs();}deck=shuffle(p);}
 function nextSong(){if(!deck.length)refillDeck();song=deck.pop();used.add(song.t);}
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
 
@@ -592,6 +607,83 @@ async function loadLeaderboard(){
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+// ── Album filter ──────────────────────────────
+const ALBUMS = [...new Set(ALL_SONGS.map(s=>s.a))]; // preserve insertion order
+let enabledAlbums = new Set(ALBUMS); // all on by default
+
+function loadFilterPrefs() {
+  try {
+    const saved = localStorage.getItem('meshuggle_albums');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      enabledAlbums = new Set(parsed.filter(a => ALBUMS.includes(a)));
+      if (enabledAlbums.size === 0) enabledAlbums = new Set(ALBUMS);
+    }
+  } catch {}
+}
+
+function saveFilterPrefs() {
+  try { localStorage.setItem('meshuggle_albums', JSON.stringify([...enabledAlbums])); } catch {}
+}
+
+function buildFilterChips() {
+  const container = document.getElementById('filter-chips');
+  container.innerHTML = '';
+
+  // All chip
+  const allChip = document.createElement('span');
+  allChip.className = 'fchip all-chip' + (enabledAlbums.size === ALBUMS.length ? ' on' : '');
+  allChip.textContent = 'All';
+  allChip.addEventListener('click', () => {
+    enabledAlbums = new Set(ALBUMS);
+    saveFilterPrefs();
+    buildFilterChips();
+    restartIfNeeded();
+  });
+  container.appendChild(allChip);
+
+  ALBUMS.forEach(album => {
+    const chip = document.createElement('span');
+    const on = enabledAlbums.has(album);
+    chip.className = 'fchip' + (on ? ' on' : '');
+    // Shorten long album names for display
+    const short = album.replace('The Violent Sleep of Reason','VSoR').replace('Contradictions Collapse','Contradictions').replace('Destroy Erase Improve','DEI').replace('The True Human Design','True Human').replace('Catch Thirtythree','Catch 33');
+    chip.textContent = short;
+    chip.title = album;
+    chip.addEventListener('click', () => {
+      if (enabledAlbums.has(album)) {
+        if (enabledAlbums.size > 1) enabledAlbums.delete(album); // always keep at least one
+      } else {
+        enabledAlbums.add(album);
+      }
+      saveFilterPrefs();
+      buildFilterChips();
+      restartIfNeeded();
+    });
+    container.appendChild(chip);
+  });
+}
+
+function restartIfNeeded() {
+  // Only restart if current song is from a now-disabled album
+  if (song && !enabledAlbums.has(song.a)) {
+    init();
+  } else {
+    // Rebuild deck with new filter but keep current song
+    deck = deck.filter(s => enabledAlbums.has(s.a));
+  }
+}
+
+function filteredSongs() {
+  return ALL_SONGS.filter(s => enabledAlbums.has(s.a));
+}
+
+document.getElementById('filter-toggle').addEventListener('click', () => {
+  const chips = document.getElementById('filter-chips');
+  const open = chips.classList.toggle('open');
+  document.getElementById('filter-toggle').textContent = open ? '🎛 Albums ▴' : '🎛 Albums ▾';
+});
+
 playBtn.addEventListener('click',()=>playClip(false));
 altBtn.addEventListener('click',()=>playClip(true));
 searchEl.addEventListener('input',e=>{renderSuggestions(e.target.value);if(!e.target.value){searchEl._chosen=null;submitBtn.disabled=true;}});
@@ -600,6 +692,8 @@ searchEl.addEventListener('keydown',e=>{if(e.key==='Enter'&&!submitBtn.disabled)
 submitBtn.addEventListener('click',submitGuess);
 skipBtn.addEventListener('click',doSkip);
 
+loadFilterPrefs();
+buildFilterChips();
 init();
 </script>
 </body>
