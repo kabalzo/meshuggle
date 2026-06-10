@@ -41,7 +41,7 @@
     .strike-pips { display: flex; gap: 4px; }
     .sp { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--border2); background: transparent; transition: all 0.2s; }
     .sp.hit { background: var(--red); border-color: var(--red); }
-    #columns { flex: 1; min-height: 0; display: grid; grid-template-columns: 260px 1fr 260px; gap: 0.6rem; }
+    #columns { flex: 1; min-height: 0; display: grid; grid-template-columns: 280px 1fr 280px; gap: 0.6rem; }
     .col-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
     .col-header { flex-shrink: 0; padding: 0.45rem 0.85rem; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     #history-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0.45rem; display: flex; flex-direction: column; gap: 3px; }
@@ -144,6 +144,16 @@
     @keyframes rot { to { transform: rotate(360deg); } }
     #band-img-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0.75rem; overflow: hidden; padding-top: 0.5rem; }
     #support-link { font-size: 0.8rem; color: var(--text2); text-decoration: none; letter-spacing: 0.05em; transition: color 0.15s; flex-shrink: 0; padding: 0.2rem 0; border-bottom: 1px solid var(--border2); }
+    /* Ranked mode toggle */
+    #ranked-toggle { font-size: 0.7rem; font-weight: 500; font-family: inherit; cursor: pointer; border-radius: 6px; padding: 0.2rem 0.6rem; transition: all 0.2s; border: 1px solid var(--border2); white-space: nowrap; }
+    #ranked-toggle.ranked-off { background: transparent; color: var(--text3); }
+    #ranked-toggle.ranked-off:hover { color: var(--text2); border-color: var(--yellow); }
+    #ranked-toggle.ranked-on { background: var(--yellow); color: #0a0a0a; border-color: var(--yellow); font-weight: 600; }
+    /* Timer bar */
+    #timer-wrap { width: 100%; display: flex; align-items: center; gap: 0.5rem; }
+    #timer-bar { flex: 1; height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; position: relative; }
+    #timer-bar::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: var(--timer-pct, 100%); background: var(--timer-color, var(--green)); border-radius: 2px; transition: width 0.1s linear, background 0.3s; }
+    #timer-label { font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; color: var(--text2); width: 18px; text-align: right; flex-shrink: 0; }
     #support-link:hover { color: var(--accent); }
     #band-img { width: 100%; flex: 1; min-height: 0; object-fit: contain; object-position: center center; border-radius: 10px; opacity: 0.9; }
     #disclaimer { font-size: 0.62rem; color: var(--text3); text-align: center; padding: 0 0.5rem; line-height: 1.5; flex-shrink: 0; }
@@ -173,6 +183,7 @@
 
   <div id="filter-bar">
     <button id="filter-toggle">🎛 Albums ▾</button>
+    <button id="ranked-toggle" class="ranked-off" title="In ranked mode, you have 10 seconds to answer or it counts as a strike. Only ranked games can submit to the leaderboard.">🏆 Rank my score: OFF</button>
     <div id="filter-chips"></div>
   </div>
 
@@ -202,6 +213,10 @@
           <button class="clip-btn alt" id="alt-btn" disabled>🔒 Alt clip</button>
         </div>
         <div id="prog-wrap"><div id="prog-fill"></div></div>
+        <div id="timer-wrap" style="display:none">
+          <div id="timer-bar"></div>
+          <span id="timer-label">10</span>
+        </div>
         <div id="hint"></div>
         <div id="current-guesses"></div>
       </div>
@@ -393,10 +408,11 @@ const ALL_SONGS=[
 const CLIP_MS=3000,MAX_STR=3,MAX_OUTS=3,MAX_SKIPS=3,ALT_UNLOCK=2;
 const ORDINALS=['1st try','2nd try','3rd try'];
 let deck=[],used=new Set(),song=null;
+let rankedMode=false;
 let songNum=0,score=0,outs=0,skipsLeft=MAX_SKIPS,strikes=0;
 let wrongGuesses=[],feedItems=[];
 let previewCache={},clipStart=0,altStart=0;
-let progTimer=null,canPlay=true,scoreSubmitted=false;
+let progTimer=null,answerTimer=null,answerTimeLeft=0,canPlay=true,scoreSubmitted=false;
 
 const audio=document.getElementById('audio');
 const playBtn=document.getElementById('play-btn');
@@ -469,6 +485,8 @@ function setupSong(){
   document.getElementById('search-wrap').style.display='';
   document.getElementById('action-row').style.display='';
   updateStrikes();
+  clearAnswerTimer();
+  if(document.getElementById('timer-wrap')) document.getElementById('timer-wrap').style.display='none';
   fetchPreview(song).then(prefetch);
 }
 
@@ -523,6 +541,7 @@ async function playClip(useAlt){
     playBtn.innerHTML='▶&nbsp; Replay';playBtn.disabled=false;
     if(strikes>=ALT_UNLOCK){altBtn.innerHTML='🎵 Alt clip';altBtn.disabled=false;}
     canPlay=true;
+    startAnswerTimer();
   },CLIP_MS);
 }
 
@@ -544,6 +563,7 @@ function pick(s){searchEl._chosen=s;searchEl.value=s.t;sugBox.style.display='non
 
 function submitGuess(){const c=searchEl._chosen;if(!c)return;resolve(c.t.toLowerCase()===song.t.toLowerCase()?'correct':'wrong',c.t);}
 function doSkip(){
+  stopAnswerTimer();
   // Only costs a skip if the song had a valid preview
   const hadPreview=!!previewCache[song.t];
   if(hadPreview){if(skipsLeft<=0)return;skipsLeft--;updateStats();}
@@ -551,7 +571,7 @@ function doSkip(){
 }
 
 function resolve(result,guessName){
-  audio.pause();clearInterval(progTimer);
+  audio.pause();clearInterval(progTimer);stopAnswerTimer();
   if(result==='correct'){
     score++;updateStats();
     pushFeed('correct',song,strikes,[...wrongGuesses]);
@@ -625,11 +645,19 @@ function showResults(){
   sb.onclick=()=>{navigator.clipboard.writeText(txt).catch(()=>{});document.getElementById('copy-tip').textContent='Copied!';setTimeout(()=>{document.getElementById('copy-tip').textContent='click to copy';},2000);};
   document.getElementById('submitted-area').style.display='none';
   document.getElementById('name-entry').style.display='';
+  if(!rankedMode){
+    document.getElementById('name-error').textContent='Switch to ranked mode before playing to submit scores.';
+    document.getElementById('name-submit').disabled=true;
+  } else {
+    document.getElementById('name-error').textContent='';
+    document.getElementById('name-submit').disabled=false;
+  }
   document.getElementById('name-input').value='';
   document.getElementById('name-error').textContent='';
   document.getElementById('name-submit').onclick=async()=>{
     if(scoreSubmitted)return;
     const name=document.getElementById('name-input').value.trim();
+    if(!rankedMode){document.getElementById('name-error').textContent='Only ranked games can submit to the leaderboard.';return;}
     if(!name){document.getElementById('name-error').textContent='Please enter a name.';return;}
     const btn=document.getElementById('name-submit');
     btn.disabled=true;btn.textContent='…';
@@ -673,6 +701,53 @@ async function loadLeaderboard(){
 }
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── Ranked mode ───────────────────────────────
+const ANSWER_TIME = 10; // seconds
+
+function startAnswerTimer() {
+  if (!rankedMode) return;
+  clearAnswerTimer();
+  answerTimeLeft = ANSWER_TIME;
+  const wrap = document.getElementById('timer-wrap');
+  const label = document.getElementById('timer-label');
+  const bar = document.getElementById('timer-bar');
+  wrap.style.display = 'flex';
+  updateTimerDisplay();
+
+  answerTimer = setInterval(() => {
+    answerTimeLeft -= 0.1;
+    if (answerTimeLeft <= 0) {
+      answerTimeLeft = 0;
+      updateTimerDisplay();
+      clearAnswerTimer();
+      // Time's up — count as a wrong guess with no song name
+      resolve('wrong', '(time out)');
+    } else {
+      updateTimerDisplay();
+    }
+  }, 100);
+}
+
+function clearAnswerTimer() {
+  clearInterval(answerTimer);
+  answerTimer = null;
+}
+
+function updateTimerDisplay() {
+  const pct = (answerTimeLeft / ANSWER_TIME) * 100;
+  const color = pct > 50 ? 'var(--green)' : pct > 25 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('timer-bar').style.setProperty('--timer-pct', pct + '%');
+  document.getElementById('timer-bar').style.setProperty('--timer-color', color);
+  document.getElementById('timer-label').textContent = Math.ceil(answerTimeLeft);
+}
+
+function stopAnswerTimer() {
+  clearAnswerTimer();
+  if (rankedMode) {
+    document.getElementById('timer-wrap').style.display = 'none';
+  }
+}
 
 // ── Album filter ──────────────────────────────
 const ALBUMS = [...new Set(ALL_SONGS.map(s=>s.a))]; // preserve insertion order
@@ -749,6 +824,19 @@ document.getElementById('filter-toggle').addEventListener('click', () => {
   const chips = document.getElementById('filter-chips');
   const open = chips.classList.toggle('open');
   document.getElementById('filter-toggle').textContent = open ? '🎛 Albums ▴' : '🎛 Albums ▾';
+});
+
+document.getElementById('ranked-toggle').addEventListener('click', () => {
+  rankedMode = !rankedMode;
+  const btn = document.getElementById('ranked-toggle');
+  btn.className = rankedMode ? 'ranked-on' : 'ranked-off';
+  btn.textContent = rankedMode ? '🏆 Rank my score: ON' : '🏆 Rank my score: OFF';
+  // Show leaderboard notice in name-entry if visible
+  if (!rankedMode && resultsEl.classList.contains('show')) {
+    document.getElementById('name-error').textContent = 'Switch to ranked mode to submit scores.';
+  }
+  // Restart game when toggling so rules are consistent
+  if (songNum > 1) init();
 });
 
 playBtn.addEventListener('click',()=>playClip(false));
