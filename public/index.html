@@ -142,10 +142,10 @@
     .lb-refresh:hover { color: var(--text); background: var(--bg3); }
     .spin { display: inline-block; width: 10px; height: 10px; border: 1.5px solid var(--text3); border-top-color: var(--accent); border-radius: 50%; animation: rot 0.65s linear infinite; vertical-align: middle; margin-right: 4px; }
     @keyframes rot { to { transform: rotate(360deg); } }
-    #band-img-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0.5rem; overflow: hidden; }
-    #support-link { font-size: 0.78rem; color: var(--text2); text-decoration: none; letter-spacing: 0.04em; transition: color 0.15s; flex-shrink: 0; }
+    #band-img-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0.75rem; overflow: hidden; padding-top: 0.5rem; }
+    #support-link { font-size: 0.8rem; color: var(--text2); text-decoration: none; letter-spacing: 0.05em; transition: color 0.15s; flex-shrink: 0; padding: 0.2rem 0; border-bottom: 1px solid var(--border2); }
     #support-link:hover { color: var(--accent); }
-    #band-img { width: 100%; max-height: 100%; object-fit: contain; object-position: center bottom; border-radius: 10px; opacity: 0.85; }
+    #band-img { width: 100%; flex: 1; min-height: 0; object-fit: contain; object-position: center center; border-radius: 10px; opacity: 0.9; }
     #disclaimer { font-size: 0.62rem; color: var(--text3); text-align: center; padding: 0 0.5rem; line-height: 1.5; flex-shrink: 0; }
     /* Footer */
     #footer { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0.35rem 0.25rem; gap: 1rem; }
