@@ -352,13 +352,7 @@ async function fetchPreview(s){
   }catch{}
   return previewCache[s.t];
 }
-function prefetch(){
-  // Prefetch upcoming songs and silently remove any with no preview from deck
-  deck.slice(-3).forEach(async s=>{
-    const url=await fetchPreview(s);
-    if(!url) deck=deck.filter(d=>d.t!==s.t);
-  });
-}
+function prefetch(){deck.slice(-2).forEach(s=>fetchPreview(s));}
 
 function init(){
   deck=[];used=new Set();
@@ -418,11 +412,9 @@ async function playClip(useAlt){
   btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
   const url=await fetchPreview(song);
   if(!url){
-    // No preview — silently advance to next song, no cost to player
-    canPlay=true;
-    playBtn.innerHTML='▶&nbsp; Play clip';playBtn.disabled=false;
-    nextSong();setupSong();
-    return;
+    hintEl.innerHTML='<span style="color:var(--red)">No preview — skip to continue</span>';
+    btn.innerHTML=useAlt?'🎵 Alt clip':'▶&nbsp; Play clip';
+    btn.disabled=useAlt?strikes<ALT_UNLOCK:false;canPlay=true;return;
   }
   const start=useAlt?altStart:clipStart;
   audio.src=url;audio.currentTime=start;audio.volume=0.6;
@@ -463,12 +455,7 @@ function renderSuggestions(q){
 function pick(s){searchEl._chosen=s;searchEl.value=s.t;sugBox.style.display='none';submitBtn.disabled=false;}
 
 function submitGuess(){const c=searchEl._chosen;if(!c)return;resolve(c.t.toLowerCase()===song.t.toLowerCase()?'correct':'wrong',c.t);}
-function doSkip(){
-  // Only costs a skip if the song had a valid preview
-  const hadPreview=!!previewCache[song.t];
-  if(hadPreview){if(skipsLeft<=0)return;skipsLeft--;updateStats();}
-  resolve('skipped',null);
-}
+function doSkip(){if(skipsLeft<=0)return;skipsLeft--;updateStats();resolve('skipped',null);}
 
 function resolve(result,guessName){
   audio.pause();clearInterval(progTimer);

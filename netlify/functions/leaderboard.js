@@ -29,14 +29,11 @@ function isValidName(name) {
   return isClean(t);
 }
 
-// Upstash REST API: commands go in the URL path, not the body
-// e.g. GET https://<host>/zadd/mykey/1/member
+// Use query param auth - this database requires ?_token= instead of Bearer header
 async function redis(...args) {
   const path = args.map(a => encodeURIComponent(String(a))).join("/");
-  const res = await fetch(`${BASE_URL}/${path}`, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${TOKEN}` },
-  });
+  const url = `${BASE_URL}/${path}?_token=${encodeURIComponent(TOKEN)}`;
+  const res = await fetch(url);
   const data = await res.json();
   if (data.error) throw new Error(data.error);
   return data.result;
@@ -109,7 +106,6 @@ exports.handler = async function (event) {
         date: new Date().toISOString().slice(0, 10),
       });
 
-      // Sort key: higher score = higher rank; ties broken by earliest submission
       const sortKey = scoreNum * 1e9 + (1e9 - (Date.now() % 1e9));
 
       await redis("ZADD", KEY, sortKey, entry);
