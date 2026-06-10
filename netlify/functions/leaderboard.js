@@ -55,7 +55,7 @@ exports.handler = async function (event) {
   // GET — return top 20
   if (event.httpMethod === "GET") {
     try {
-      const raw = await redis("ZREVRANGE", KEY, 0, 19, "WITHSCORES");
+      const raw = await redis("ZREVRANGE", KEY, 0, 49, "WITHSCORES");
       const entries = [];
       for (let i = 0; i < raw.length; i += 2) {
         try {

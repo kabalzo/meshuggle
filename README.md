@@ -1,80 +1,105 @@
 # Meshuggle 🎸
 
-Guess the Meshuggah song from a 2-second Spotify preview clip.
+A Meshuggah song guessing game. Listen to a 3-second clip and identify the track before racking up 3 outs.
 
-## Setup
+**Live at [meshuggle.com](https://meshuggle.com)**
 
-### 1. Get Spotify API credentials
+## How to Play
 
-1. Go to https://developer.spotify.com/dashboard
-2. Log in with your Spotify account (free account works)
-3. Click **Create app**
-   - App name: `Meshuggle` (or anything)
-   - Redirect URI: `http://localhost:8888` (required but unused)
-   - Check **Web API**
-4. Click **Settings** → copy your **Client ID** and **Client Secret**
+- Hit **Play clip** to hear a 3-second snippet from a random Meshuggah track
+- Search for and submit your guess
+- **3 strikes** (wrong guesses) on a single song = **1 out**
+- **3 outs** and your game is over — score is how many songs you identified correctly
+- **3 skips** per game — skipping reveals the answer with no out penalty
+- **Alt clip** unlocks after 2 strikes — plays a different section of the same track
+- After the 1st wrong guess, you get an album name hint
+- Filter by album to focus on specific parts of the discography
+- Submit your score to the global leaderboard at the end
 
-### 2. Configure environment variables
+## Tech Stack
 
-**For local dev:**
-```bash
-cp .env.example .env
-# Edit .env and paste your Client ID and Secret
+| | |
+|---|---|
+| **Frontend** | Vanilla HTML/CSS/JS, single file |
+| **Hosting** | [Netlify](https://netlify.com) |
+| **Audio previews** | [iTunes Search API](https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI) — free, no auth required |
+| **Leaderboard** | [Upstash Redis](https://upstash.com) via Netlify serverless function |
+| **Built with** | [Claude](https://claude.ai) (Anthropic) |
+
+## Project Structure
+
+```
+meshuggle/
+├── public/
+│   └── index.html          # Entire game — HTML, CSS, and JS in one file
+├── netlify/
+│   └── functions/
+│       ├── leaderboard.js  # GET/POST leaderboard via Upstash Redis
+│       └── debug.js        # Diagnostics endpoint for Upstash connectivity
+├── netlify.toml            # Netlify build config
+├── package.json
+└── README.md
 ```
 
-**For Netlify (production):**
-1. Go to your Netlify site → **Site configuration** → **Environment variables**
-2. Add two variables:
-   - `SPOTIFY_CLIENT_ID` = your client ID
-   - `SPOTIFY_CLIENT_SECRET` = your client secret
+## Local Development
 
-### 3. Deploy to Netlify
-
-**Option A — Netlify CLI (recommended for local dev too):**
 ```bash
 npm install
 npx netlify login
-npx netlify init       # link to your Netlify account/site
-npx netlify dev        # run locally at http://localhost:8888
-npx netlify deploy --prod  # deploy to production
+npx netlify link        # link to your Netlify site
+npx netlify dev         # runs at http://localhost:8888
 ```
 
-**Option B — Drag and drop:**
-1. Zip the entire `meshuggle/` folder
-2. Go to https://app.netlify.com → drag the zip onto your team dashboard
-3. Add the environment variables in site settings (see step 2 above)
-4. Trigger a redeploy from the Netlify dashboard
+## Deployment
 
-**Option C — GitHub:**
-1. Push this folder to a GitHub repo
-2. In Netlify: **Add new site** → **Import from Git** → select your repo
-3. Build settings:
-   - Build command: *(leave blank)*
-   - Publish directory: `public`
-4. Add environment variables, then deploy
+Push to the `main` branch — Netlify auto-deploys on every push.
 
-## How it works
-
-```
-Browser                    Netlify Functions           Spotify
-  |                               |                       |
-  |-- GET /.netlify/functions/ -->|                       |
-  |     spotify-preview           |-- POST /token ------->|
-  |                               |<-- access_token ------|
-  |                               |-- GET /search ------->|
-  |<-- { preview_url } ----------|<-- track results ------|
-  |                               |                       |
-  |-- <audio src=preview_url> --> Spotify CDN (direct)
+```bash
+git add .
+git commit -m "your message"
+git push
 ```
 
-- Your Spotify client secret **never reaches the browser**
-- Preview URLs are cached 24h by Netlify's CDN
-- The access token is fetched fresh per function call (cached 55 min)
-- Audio plays directly from Spotify's CDN — no proxying
+## Environment Variables
 
-## Notes on previews
+Set these in **Netlify → Site configuration → Environment variables**:
 
-Spotify provides 30-second preview clips for most (but not all) tracks.
-Older or more obscure Meshuggah tracks may not have previews — the game
-will show a warning and let you skip those rounds. The more popular albums
-(obZen, Koloss, Immutable, Chaosphere) have near-100% preview coverage.
+| Variable | Description |
+|---|---|
+| `UPSTASH_REDIS_REST_URL` | Your Upstash database REST URL |
+| `UPSTASH_REDIS_REST_TOKEN` | Your Upstash REST token (mark as secret) |
+
+> **Note:** Upstash auth uses query param style (`?_token=...`) rather than Bearer headers — this is handled automatically in the leaderboard function.
+
+## Diagnostics
+
+If the leaderboard stops working, visit:
+
+```
+https://meshuggle.com/.netlify/functions/debug
+```
+
+This endpoint tests your Upstash connection live and reports exactly what's failing.
+
+## Discography Coverage
+
+~95 songs across all studio albums and major EPs:
+
+- Contradictions Collapse (1991)
+- None EP (1994)
+- Destroy Erase Improve (1995)
+- The True Human Design EP (1997)
+- Chaosphere (1998)
+- Nothing (2002)
+- I EP (2004)
+- Catch Thirtythree (2005)
+- obZen (2008)
+- Koloss (2012)
+- The Violent Sleep of Reason (2016)
+- Immutable (2022)
+
+Songs without iTunes preview availability are silently skipped and never dealt to the player.
+
+## License
+
+MIT
