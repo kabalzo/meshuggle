@@ -584,6 +584,7 @@ function resolve(result,guessName){
   }
   wrongGuesses.push({name:guessName});
   strikes++;updateStrikes();updateCurrentGuesses();
+  timerStarted=false; // reset so next attempt gets a fresh timer
   searchEl._chosen=null;searchEl.value='';submitBtn.disabled=true;sugBox.style.display='none';
   if(strikes>=MAX_STR){
     outs++;updateStats();
