@@ -40,7 +40,7 @@
     .strike-pips { display: flex; gap: 4px; }
     .sp { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--border2); background: transparent; transition: all 0.2s; }
     .sp.hit { background: var(--red); border-color: var(--red); }
-    #columns { flex: 1; min-height: 0; display: grid; grid-template-columns: 210px 1fr 210px; gap: 0.6rem; }
+    #columns { flex: 1; min-height: 0; display: grid; grid-template-columns: 260px 1fr 260px; gap: 0.6rem; }
     .col-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
     .col-header { flex-shrink: 0; padding: 0.45rem 0.85rem; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     #history-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0.45rem; display: flex; flex-direction: column; gap: 3px; }
@@ -121,6 +121,7 @@
     .lb-name { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .lb-score { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; flex-shrink: 0; }
     .lb-date { font-size: 0.62rem; color: var(--text3); flex-shrink: 0; }
+    .lb-tag { font-size: 0.6rem; color: var(--text3); margin-left: 3px; font-family: 'JetBrains Mono', monospace; }
     .lb-score.hi { color: var(--green); }
     .lb-score.mid { color: var(--yellow); }
     .lb-score.lo { color: var(--text2); }
@@ -186,7 +187,7 @@
           <div class="name-entry" id="name-entry">
             <label>Add your score to the leaderboard</label>
             <div class="name-row">
-              <input class="name-input" id="name-input" type="text" maxlength="20" placeholder="Your name…" autocomplete="off" spellcheck="false" />
+              <input class="name-input" id="name-input" type="text" maxlength="8" placeholder="Your name…" autocomplete="off" spellcheck="false" />
               <button class="name-submit" id="name-submit">Submit</button>
             </div>
             <div class="name-error" id="name-error"></div>
@@ -580,7 +581,7 @@ async function loadLeaderboard(){
     el.innerHTML=entries.slice(0,10).map((e,i)=>`
       <div class="lb-row">
         <span class="lb-rank">${medals[i]||(i+1)+'.'}</span>
-        <span class="lb-name">${esc(e.name)}</span>
+        <span class="lb-name">${esc(e.name)}<span class="lb-tag">#${esc(e.tag||'???')}</span></span>
         <span class="lb-score ${sc(e.score)}">${e.score}</span>
         <span class="lb-date">${e.date||''}</span>
       </div>`).join('');

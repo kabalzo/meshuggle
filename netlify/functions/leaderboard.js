@@ -24,7 +24,7 @@ function isClean(name) {
 function isValidName(name) {
   if (!name || typeof name !== "string") return false;
   const t = name.trim();
-  if (t.length < 1 || t.length > 20) return false;
+  if (t.length < 1 || t.length > 8) return false;
   if (!/^[a-zA-Z0-9 _\-\.!]+$/.test(t)) return false;
   return isClean(t);
 }
@@ -60,7 +60,8 @@ exports.handler = async function (event) {
       for (let i = 0; i < raw.length; i += 2) {
         try {
           const entry = JSON.parse(raw[i]);
-          entries.push({ ...entry, score: parseInt(raw[i + 1]) });
+          // raw[i+1] is the sort key, not the real score — use entry.score from the stored JSON
+          entries.push(entry);
         } catch { /* skip malformed */ }
       }
       return {
@@ -100,8 +101,18 @@ exports.handler = async function (event) {
         };
       }
 
+      const trimmedName = name.trim();
+      // Generate a short deterministic hash tag from name+date so duplicates are distinguishable
+      const hashInput = trimmedName.toLowerCase() + new Date().toISOString().slice(0, 10);
+      let h = 0;
+      for (let i = 0; i < hashInput.length; i++) { h = (Math.imul(31, h) + hashInput.charCodeAt(i)) | 0; }
+      h = Math.abs(h);
+      const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no ambiguous 0/O/1/I
+      const tag = CHARS[h % CHARS.length] + CHARS[Math.floor(h / CHARS.length) % CHARS.length] + String(h % 10);
+
       const entry = JSON.stringify({
-        name: name.trim(),
+        name: trimmedName,
+        tag,
         score: scoreNum,
         date: new Date().toISOString().slice(0, 10),
       });
