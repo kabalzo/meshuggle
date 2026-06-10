@@ -412,7 +412,7 @@ let rankedMode=false;
 let songNum=0,score=0,outs=0,skipsLeft=MAX_SKIPS,strikes=0;
 let wrongGuesses=[],feedItems=[];
 let previewCache={},clipStart=0,altStart=0;
-let progTimer=null,answerTimer=null,answerTimeLeft=0,canPlay=true,scoreSubmitted=false;
+let progTimer=null,answerTimer=null,answerTimeLeft=0,timerStarted=false,canPlay=true,scoreSubmitted=false;
 
 const audio=document.getElementById('audio');
 const playBtn=document.getElementById('play-btn');
@@ -486,6 +486,7 @@ function setupSong(){
   document.getElementById('action-row').style.display='';
   updateStrikes();
   clearAnswerTimer();
+  timerStarted=false;
   if(document.getElementById('timer-wrap')) document.getElementById('timer-wrap').style.display='none';
   fetchPreview(song).then(prefetch);
 }
@@ -541,7 +542,7 @@ async function playClip(useAlt){
     playBtn.innerHTML='▶&nbsp; Replay';playBtn.disabled=false;
     if(strikes>=ALT_UNLOCK){altBtn.innerHTML='🎵 Alt clip';altBtn.disabled=false;}
     canPlay=true;
-    startAnswerTimer();
+    if(!timerStarted){ timerStarted=true; startAnswerTimer(); }
   },CLIP_MS);
 }
 
