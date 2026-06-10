@@ -412,7 +412,7 @@ let rankedMode=false;
 let songNum=0,score=0,outs=0,skipsLeft=MAX_SKIPS,strikes=0;
 let wrongGuesses=[],feedItems=[];
 let previewCache={},clipStart=0,altStart=0;
-let progTimer=null,answerTimer=null,answerTimeLeft=0,timerStarted=false,canPlay=true,scoreSubmitted=false;
+let progTimer=null,answerTimer=null,answerTimeLeft=0,canPlay=true,scoreSubmitted=false;
 
 const audio=document.getElementById('audio');
 const playBtn=document.getElementById('play-btn');
@@ -486,7 +486,6 @@ function setupSong(){
   document.getElementById('action-row').style.display='';
   updateStrikes();
   clearAnswerTimer();
-  timerStarted=false;
   if(document.getElementById('timer-wrap')) document.getElementById('timer-wrap').style.display='none';
   fetchPreview(song).then(prefetch);
 }
@@ -542,7 +541,7 @@ async function playClip(useAlt){
     playBtn.innerHTML='▶&nbsp; Replay';playBtn.disabled=false;
     if(strikes>=ALT_UNLOCK){altBtn.innerHTML='🎵 Alt clip';altBtn.disabled=false;}
     canPlay=true;
-    if(!timerStarted){ timerStarted=true; startAnswerTimer(); }
+    if(!answerTimer){ startAnswerTimer(); }
   },CLIP_MS);
 }
 
@@ -584,7 +583,6 @@ function resolve(result,guessName){
   }
   wrongGuesses.push({name:guessName});
   strikes++;updateStrikes();updateCurrentGuesses();
-  timerStarted=false; // reset so next attempt gets a fresh timer
   searchEl._chosen=null;searchEl.value='';submitBtn.disabled=true;sugBox.style.display='none';
   if(strikes>=MAX_STR){
     outs++;updateStats();
