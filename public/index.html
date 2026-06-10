@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meshuggle 🎸</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,6 +26,7 @@
     #header { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
     #header h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -1px; }
     #subtitle { font-size: 0.72rem; font-weight: 400; color: var(--text3); letter-spacing: 0; vertical-align: middle; }
+    #guitar-icon { height: 1.1em; width: auto; vertical-align: middle; display: inline-block; image-rendering: -webkit-optimize-contrast; }
     #header h1 em { font-style: normal; color: var(--accent); }
     #header p { font-size: 0.72rem; color: var(--text3); }
     #stats {
@@ -177,7 +179,7 @@
 </head>
 <body>
   <div id="header">
-    <h1>Mesh<em>uggle</em> 🎸 <span id="subtitle">| test your knowledge of the greatest band in the universe</span></h1>
+    <h1>Mesh<em>uggle</em> <img id="guitar-icon" src="/guitar.png" alt="🎸" /> <span id="subtitle">| test your knowledge of the greatest band in the universe</span></h1>
     <p>3 strikes = out &nbsp;·&nbsp; 3 outs = game over &nbsp;·&nbsp; 3 skips per game</p>
   </div>
 
