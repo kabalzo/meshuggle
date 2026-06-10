@@ -31,7 +31,8 @@ A Meshuggah song guessing game. Listen to a 3-second clip and identify the track
 ```
 meshuggle/
 ├── public/
-│   └── index.html          # Entire game — HTML, CSS, and JS in one file
+│   ├── index.html          # Entire game — HTML, CSS, and JS in one file
+│   └── meshuggah.png       # Band image (Koloss era)
 ├── netlify/
 │   └── functions/
 │       ├── leaderboard.js  # GET/POST leaderboard via Upstash Redis
@@ -99,6 +100,10 @@ This endpoint tests your Upstash connection live and reports exactly what's fail
 - Immutable (2022)
 
 Songs without iTunes preview availability are silently skipped and never dealt to the player.
+
+## Disclaimer
+
+Not affiliated with Meshuggah in any way — just a fan project built for fun. All song titles and album names are the property of their respective owners. Audio previews are served via the iTunes Search API.
 
 ## License
 

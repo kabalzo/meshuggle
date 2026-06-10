@@ -41,7 +41,7 @@
     .strike-pips { display: flex; gap: 4px; }
     .sp { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--border2); background: transparent; transition: all 0.2s; }
     .sp.hit { background: var(--red); border-color: var(--red); }
-    #columns { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem; }
+    #columns { flex: 1; min-height: 0; display: grid; grid-template-columns: 200px 1fr 200px; gap: 0.6rem; }
     .col-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
     .col-header { flex-shrink: 0; padding: 0.45rem 0.85rem; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     #history-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0.45rem; display: flex; flex-direction: column; gap: 3px; }
@@ -142,6 +142,9 @@
     .lb-refresh:hover { color: var(--text); background: var(--bg3); }
     .spin { display: inline-block; width: 10px; height: 10px; border: 1.5px solid var(--text3); border-top-color: var(--accent); border-radius: 50%; animation: rot 0.65s linear infinite; vertical-align: middle; margin-right: 4px; }
     @keyframes rot { to { transform: rotate(360deg); } }
+    #band-img-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0.5rem; overflow: hidden; }
+    #band-img { width: 100%; max-height: 100%; object-fit: contain; object-position: center bottom; border-radius: 10px; opacity: 0.85; }
+    #disclaimer { font-size: 0.62rem; color: var(--text3); text-align: center; padding: 0 0.5rem; line-height: 1.5; flex-shrink: 0; }
     /* Footer */
     #footer { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0.35rem 0.25rem; gap: 1rem; }
     #built-with { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
@@ -206,6 +209,11 @@
         <button id="submit-btn" disabled>Submit guess</button>
         <button id="skip-btn">Skip ⏭</button>
       </div>
+      <div id="band-img-wrap">
+        <img id="band-img" src="/meshuggah.png" alt="Meshuggah" />
+        <p id="disclaimer">Not affiliated with Meshuggah — just for fun because I love them 🤘</p>
+      </div>
+
       <div id="results">
         <div class="r-card">
           <h2 id="r-title"></h2>
@@ -432,6 +440,7 @@ function init(){
   document.getElementById('player-card').style.display='';
   document.getElementById('search-wrap').style.display='';
   document.getElementById('action-row').style.display='';
+  document.getElementById('band-img-wrap').style.display='';
   histEl.innerHTML='<div class="hist-empty" id="hist-empty">No songs yet —<br>make your first guess!</div>';
   refillDeck();nextSong();setupSong();updateStats();
   loadLeaderboard();
@@ -593,6 +602,7 @@ function showResults(){
   document.getElementById('player-card').style.display='none';
   document.getElementById('search-wrap').style.display='none';
   document.getElementById('action-row').style.display='none';
+  document.getElementById('band-img-wrap').style.display='none';
   resultsEl.classList.add('show');
   const titles=['Time for a deep listen 😬','You got one! 🤙','Getting there 🎸','Solid knowledge 🎧','Meshuggah expert 🔥','Inhuman 🥁'];
   const n = enabledAlbums.size;
