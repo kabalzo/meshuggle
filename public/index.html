@@ -24,6 +24,7 @@
     }
     #header { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
     #header h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -1px; }
+    #subtitle { font-size: 0.72rem; font-weight: 400; color: var(--text3); letter-spacing: 0; vertical-align: middle; }
     #header h1 em { font-style: normal; color: var(--accent); }
     #header p { font-size: 0.72rem; color: var(--text3); }
     #stats {
@@ -40,7 +41,7 @@
     .strike-pips { display: flex; gap: 4px; }
     .sp { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--border2); background: transparent; transition: all 0.2s; }
     .sp.hit { background: var(--red); border-color: var(--red); }
-    #columns { flex: 1; min-height: 0; display: grid; grid-template-columns: 260px 1fr 260px; gap: 0.6rem; }
+    #columns { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem; }
     .col-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
     .col-header { flex-shrink: 0; padding: 0.45rem 0.85rem; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     #history-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0.45rem; display: flex; flex-direction: column; gap: 3px; }
@@ -159,7 +160,7 @@
 </head>
 <body>
   <div id="header">
-    <h1>Mesh<em>uggle</em> 🎸</h1>
+    <h1>Mesh<em>uggle</em> 🎸 <span id="subtitle">| test your knowledge of the greatest band in the universe</span></h1>
     <p>3 strikes = out &nbsp;·&nbsp; 3 outs = game over &nbsp;·&nbsp; 3 skips per game</p>
   </div>
 
@@ -267,8 +268,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
         GitHub
       </a>
-      <span class="bw-sep">·</span>
-      <span id="contact-link">dkabala dot 2011 @ gmail dot com</span>
+
     </div>
   </div>
 
@@ -595,12 +595,14 @@ function showResults(){
   document.getElementById('action-row').style.display='none';
   resultsEl.classList.add('show');
   const titles=['Time for a deep listen 😬','You got one! 🤙','Getting there 🎸','Solid knowledge 🎧','Meshuggah expert 🔥','Inhuman 🥁'];
+  const n = enabledAlbums.size;
+  const weightedScore = Math.round(score * (n / 12) * 10) / 10;
   document.getElementById('r-title').textContent=titles[Math.min(score,titles.length-1)];
-  document.getElementById('r-sub').textContent=`${score} song${score!==1?'s':''} correct before 3 outs`;
+  document.getElementById('r-sub').textContent=`${score} songs correct · weighted score: ${weightedScore} (${n}/12 albums)`;
   const c=feedItems.filter(h=>h.result==='correct').length;
   const w=feedItems.filter(h=>h.result==='wrong').length;
   const sk=feedItems.filter(h=>h.result==='skipped').length;
-  const txt=`Meshuggle 🎸\nScore: ${score}\n✓ ${c}  ✗ ${w}  ⏭ ${sk}`;
+  const txt=`Meshuggle 🎸\nScore: ${weightedScore} (${score} × ${n}/12)\n✓ ${c}  ✗ ${w}  ⏭ ${sk}`;
   const sb=document.getElementById('share-box');
   sb.textContent=txt;
   sb.onclick=()=>{navigator.clipboard.writeText(txt).catch(()=>{});document.getElementById('copy-tip').textContent='Copied!';setTimeout(()=>{document.getElementById('copy-tip').textContent='click to copy';},2000);};
@@ -615,7 +617,7 @@ function showResults(){
     const btn=document.getElementById('name-submit');
     btn.disabled=true;btn.textContent='…';
     try{
-      const res=await fetch('/.netlify/functions/leaderboard',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,score})});
+      const res=await fetch('/.netlify/functions/leaderboard',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name, score: weightedScore})});
       const data=await res.json();
       if(!res.ok){document.getElementById('name-error').textContent=data.error||'Submission failed.';btn.disabled=false;btn.textContent='Submit';return;}
       scoreSubmitted=true;
